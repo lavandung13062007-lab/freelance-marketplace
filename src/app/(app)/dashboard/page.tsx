@@ -1,22 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getApprovedPortfolioCards } from "@/lib/portfolio";
+import PortfolioGrid from "@/components/PortfolioGrid";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-
-  const { data: posts } = await supabase
-    .from("portfolio_posts")
-    .select("id, title, portfolio_post_images(image_url, position)")
-    .eq("status", "approved")
-    .order("created_at", { ascending: false });
-
-  const cards = (posts ?? [])
-    .map((post) => {
-      const cover = [...post.portfolio_post_images].sort(
-        (a, b) => a.position - b.position,
-      )[0]?.image_url;
-      return cover ? { id: post.id, title: post.title, cover } : null;
-    })
-    .filter((c): c is { id: string; title: string; cover: string } => c !== null);
+  const cards = await getApprovedPortfolioCards();
 
   if (cards.length === 0) {
     return (
@@ -27,15 +13,5 @@ export default async function DashboardPage() {
     );
   }
 
-  return (
-    <div className="columns-2 gap-4 sm:columns-3 lg:columns-4 [&>div]:mb-4">
-      {cards.map((card) => (
-        <div key={card.id} className="break-inside-avoid overflow-hidden rounded-2xl bg-gray-50">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={card.cover} alt={card.title} loading="lazy" className="w-full rounded-2xl" />
-          <p className="truncate px-1 py-2 text-xs font-medium text-gray-600">{card.title}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <PortfolioGrid cards={cards} linkToFreelancer />;
 }

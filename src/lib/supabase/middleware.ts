@@ -1,7 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/messages", "/profile", "/wallet", "/portfolio"];
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/messages",
+  "/profile",
+  "/wallet",
+  "/portfolio",
+  "/freelancer",
+];
 
 export async function updateSession(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
