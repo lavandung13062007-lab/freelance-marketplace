@@ -22,7 +22,7 @@ export default async function MessagesLayout({ children }: { children: React.Rea
   const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] min-w-[560px] gap-4">
+    <div className="flex h-[calc(100vh-3rem)] min-w-[560px] gap-4">
       <aside className="w-48 shrink-0 space-y-1 overflow-y-auto">
         {(conversations ?? []).length === 0 && (
           <p className="px-3 py-2 text-sm text-gray-400">Chưa có cuộc trò chuyện nào</p>

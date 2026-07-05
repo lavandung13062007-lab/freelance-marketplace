@@ -20,7 +20,8 @@ export default function NotificationBell() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="Thông báo"
-        className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100"
+        title="Thông báo"
+        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 hover:bg-gray-50"
       >
         <BellIcon />
       </button>
@@ -28,7 +29,7 @@ export default function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-20 mt-2 w-64 rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-lg">
+          <div className="absolute bottom-0 left-full z-20 ml-2 w-64 rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-lg">
             <p className="text-sm font-semibold text-gray-900">Chưa có thông báo</p>
             <p className="mt-1 text-xs text-gray-500">Thông báo mới sẽ xuất hiện ở đây</p>
           </div>
