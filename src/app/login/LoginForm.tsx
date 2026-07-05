@@ -2,50 +2,30 @@
 
 import Link from "next/link";
 import { login } from "@/lib/actions/auth";
+import PasswordField from "@/components/PasswordField";
+import SubmitButton from "@/components/SubmitButton";
 
 export default function LoginForm({ error }: { error?: string }) {
   return (
-    <form action={login} className="w-full max-w-sm space-y-4">
-      <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          placeholder="ban@email.com"
-        />
+    <form action={login} className="w-full max-w-sm space-y-3">
+      <input
+        name="email"
+        type="email"
+        required
+        placeholder="Email"
+        className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm outline-none focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20"
+      />
+      <PasswordField id="password" name="password" placeholder="Mật khẩu" />
+
+      {error && <p className="text-sm font-medium text-brand">{error}</p>}
+
+      <div className="pt-2">
+        <SubmitButton>Đăng nhập</SubmitButton>
       </div>
 
-      <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
-          Mật khẩu
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          placeholder="Mật khẩu"
-        />
-      </div>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <button
-        type="submit"
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-      >
-        Đăng nhập
-      </button>
-
-      <p className="text-center text-sm text-gray-600">
+      <p className="pt-1 text-center text-sm text-gray-500">
         Chưa có tài khoản?{" "}
-        <Link href="/signup" className="font-medium text-blue-600 hover:underline">
+        <Link href="/signup" className="font-semibold text-gray-900">
           Đăng ký
         </Link>
       </p>

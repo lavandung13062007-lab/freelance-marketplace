@@ -16,8 +16,8 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <h1 className="mb-8 text-2xl font-semibold text-gray-900">
+    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
+      <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-gray-900">
         Tạo tài khoản
       </h1>
       <SignupForm error={error} />

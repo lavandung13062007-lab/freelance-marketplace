@@ -11,37 +11,26 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name")
     .eq("id", user.id)
     .single();
 
-  const isFreelancer = profile?.role === "freelancer";
+  const firstName = (profile?.full_name ?? user.email ?? "").split(" ")[0];
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col px-6 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Xin chào, {profile?.full_name ?? user.email}
-        </h1>
+        <span className="text-xl font-extrabold tracking-tight text-gray-900">
+          Chào, {firstName} 👋
+        </span>
         <form action={logout}>
-          <button className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-            Đăng xuất
-          </button>
+          <button className="text-sm font-medium text-gray-400">Thoát</button>
         </form>
       </div>
 
-      <p className="mt-4 text-gray-600">
-        Bạn đang dùng tài khoản{" "}
-        <span className="font-medium text-gray-900">
-          {isFreelancer ? "Freelancer" : "Khách hàng"}
-        </span>
-        .
-      </p>
-
-      <div className="mt-8 rounded-lg border border-dashed border-gray-300 p-6 text-gray-500">
-        {isFreelancer
-          ? "Đây sẽ là nơi bạn xây hồ sơ, đăng dịch vụ và nhận đơn từ khách hàng. (tính năng sắp tới)"
-          : "Đây sẽ là nơi bạn đăng yêu cầu thiết kế và tìm freelancer phù hợp. (tính năng sắp tới)"}
+      <div className="mt-10 rounded-3xl bg-gray-50 p-6 text-center">
+        <p className="text-sm text-gray-500">Đang xây dựng</p>
+        <p className="mt-1 text-lg font-bold text-gray-900">Sắp ra mắt ✨</p>
       </div>
     </main>
   );

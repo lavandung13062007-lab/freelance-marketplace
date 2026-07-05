@@ -8,13 +8,9 @@ export async function signup(formData: FormData) {
   const fullName = (formData.get("fullName") as string)?.trim();
   const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
-  const role = formData.get("role") as string;
 
   if (!fullName || !email || !password) {
     redirect(`/signup?error=${encodeURIComponent("Vui lòng điền đầy đủ thông tin")}`);
-  }
-  if (role !== "client" && role !== "freelancer") {
-    redirect(`/signup?error=${encodeURIComponent("Vui lòng chọn loại tài khoản")}`);
   }
   if (password.length < 6) {
     redirect(`/signup?error=${encodeURIComponent("Mật khẩu cần ít nhất 6 ký tự")}`);
@@ -25,7 +21,7 @@ export async function signup(formData: FormData) {
     email,
     password,
     options: {
-      data: { full_name: fullName, role },
+      data: { full_name: fullName, role: "client" },
     },
   });
 
