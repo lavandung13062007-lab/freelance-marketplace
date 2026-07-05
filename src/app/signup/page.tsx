@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/session";
 import SignupForm from "./SignupForm";
 
 export default async function SignupPage({
@@ -7,10 +7,7 @@ export default async function SignupPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (user) redirect("/dashboard");
 
   const { error } = await searchParams;

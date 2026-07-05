@@ -1,22 +1,14 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getCurrentProfile } from "@/lib/supabase/session";
 import Sidebar from "@/components/Sidebar";
 import TopSearchBar from "@/components/TopSearchBar";
 import NotificationBell from "@/components/NotificationBell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .single();
-
+  const profile = await getCurrentProfile();
   const name = profile?.full_name ?? user.email ?? "";
 
   return (
