@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/session";
 import { getApprovedPortfolioCards } from "@/lib/portfolio";
 import PortfolioGrid from "@/components/PortfolioGrid";
+import { startConversation } from "@/lib/actions/messages";
 
 export default async function FreelancerProfilePage({
   params,
@@ -9,6 +11,7 @@ export default async function FreelancerProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const currentUser = await getCurrentUser();
   const supabase = await createClient();
 
   const { data: profile } = await supabase
@@ -27,10 +30,18 @@ export default async function FreelancerProfilePage({
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-yellow text-2xl font-bold text-gray-900">
           {profile.full_name.charAt(0).toUpperCase()}
         </span>
-        <div>
+        <div className="flex-1">
           <p className="text-lg font-extrabold text-gray-900">{profile.full_name}</p>
           <p className="text-sm text-gray-500">{cards.length} thiết kế</p>
         </div>
+        {currentUser && currentUser.id !== id && (
+          <form action={startConversation}>
+            <input type="hidden" name="userId" value={id} />
+            <button className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white">
+              Nhắn tin
+            </button>
+          </form>
+        )}
       </div>
 
       {cards.length === 0 ? (
