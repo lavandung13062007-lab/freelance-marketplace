@@ -22,16 +22,6 @@ function MessageIcon() {
   );
 }
 
-function WalletIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-5 w-5">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1H5a2 2 0 0 0-2-2Z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2H5a2 2 0 0 1-2-2Z" />
-      <circle cx="16" cy="13" r="1.25" />
-    </svg>
-  );
-}
-
 function PortfolioIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-5 w-5">
@@ -55,7 +45,6 @@ function LogoutIcon() {
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Trang chủ", Icon: HomeIcon },
   { href: "/messages", label: "Tin nhắn", Icon: MessageIcon },
-  { href: "/wallet", label: "Ví", Icon: WalletIcon },
 ];
 
 export default function Sidebar({ name }: { name: string }) {

@@ -15,12 +15,14 @@ type Result = { key: string; stats: Stats };
 
 export default function PriceGuide({
   topic,
-  excludePostId,
+  excludeImageId,
   initialValue,
+  onChange,
 }: {
   topic: string;
-  excludePostId?: string;
+  excludeImageId?: string;
   initialValue?: string;
+  onChange: (price: number) => void;
 }) {
   const [result, setResult] = useState<Result | null>(null);
   const [price, setPrice] = useState<number>(() => {
@@ -39,7 +41,7 @@ export default function PriceGuide({
 
     const controller = new AbortController();
     const params = new URLSearchParams({ topic: topicKey });
-    if (excludePostId) params.set("exclude", excludePostId);
+    if (excludeImageId) params.set("exclude", excludeImageId);
 
     fetch(`/api/portfolio/price-stats?${params.toString()}`, { signal: controller.signal })
       .then((res) => res.json())
@@ -47,13 +49,18 @@ export default function PriceGuide({
       .catch(() => setResult({ key: topicKey, stats: EMPTY_STATS }));
 
     return () => controller.abort();
-  }, [topicKey, excludePostId]);
+  }, [topicKey, excludeImageId]);
 
   const sliderMax =
     stats.max != null
       ? Math.max(Math.ceil((stats.max * 1.5) / STEP) * STEP, DEFAULT_MAX)
       : DEFAULT_MAX;
   const displayPrice = Math.min(price, sliderMax);
+
+  useEffect(() => {
+    onChange(displayPrice);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayPrice]);
 
   const avgBarIndex =
     stats.count > 0 && stats.avg != null && stats.min != null && stats.max != null
@@ -85,7 +92,6 @@ export default function PriceGuide({
               : "Chọn chủ đề để xem giá tham khảo"}
       </p>
 
-      <input type="hidden" name="price" value={displayPrice} />
       <input
         type="range"
         min={0}

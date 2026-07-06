@@ -34,7 +34,6 @@ export default function TopicSelect({
 
   return (
     <div className="relative">
-      <input type="hidden" name="topic" value={value} />
       <input
         value={input}
         onChange={(e) => {

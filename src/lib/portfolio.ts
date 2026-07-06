@@ -15,39 +15,34 @@ export type PortfolioCard = {
 export async function getApprovedPortfolioCards(freelancerId?: string): Promise<PortfolioCard[]> {
   const supabase = await createClient();
 
-  let query = supabase
-    .from("portfolio_posts")
-    .select(
-      "id, title, description, link, price, topic, freelancer_id, portfolio_post_images(image_url, position)",
+  let postsQuery = supabase.from("portfolio_posts").select("id, freelancer_id").eq("status", "approved");
+  if (freelancerId) {
+    postsQuery = postsQuery.eq("freelancer_id", freelancerId);
+  }
+  const { data: posts } = await postsQuery;
+  if (!posts || posts.length === 0) return [];
+
+  const freelancerByPost = new Map(posts.map((p) => [p.id, p.freelancer_id]));
+
+  const { data: images } = await supabase
+    .from("portfolio_post_images")
+    .select("id, post_id, title, description, link, price, topic, image_url")
+    .in(
+      "post_id",
+      posts.map((p) => p.id),
     )
-    .eq("status", "approved")
     .order("created_at", { ascending: false });
 
-  if (freelancerId) {
-    query = query.eq("freelancer_id", freelancerId);
-  }
-
-  const { data } = await query;
-
-  return (data ?? [])
-    .map((post) => {
-      const cover = [...post.portfolio_post_images].sort(
-        (a, b) => a.position - b.position,
-      )[0]?.image_url;
-      return cover
-        ? {
-            id: post.id,
-            title: post.title,
-            cover,
-            freelancerId: post.freelancer_id,
-            price: post.price,
-            description: post.description,
-            link: post.link,
-            topic: post.topic,
-          }
-        : null;
-    })
-    .filter((c): c is PortfolioCard => c !== null);
+  return (images ?? []).map((img) => ({
+    id: img.id,
+    title: img.title,
+    cover: img.image_url,
+    freelancerId: freelancerByPost.get(img.post_id)!,
+    price: img.price,
+    description: img.description,
+    link: img.link,
+    topic: img.topic,
+  }));
 }
 
 export async function getAllTagNames(): Promise<string[]> {
@@ -66,13 +61,13 @@ export async function getCategoryNames(): Promise<string[]> {
   return (data ?? []).map((t) => t.name);
 }
 
-export async function syncPostTags(
+export async function syncCardTags(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,
-  postId: string,
+  imageId: string,
   tagNames: string[],
 ): Promise<void> {
-  await supabase.from("portfolio_post_tags").delete().eq("post_id", postId);
+  await supabase.from("portfolio_post_tags").delete().eq("post_image_id", imageId);
 
   for (const name of tagNames) {
     const { data: existingTag } = await supabase
@@ -91,7 +86,7 @@ export async function syncPostTags(
       tagId = createdTag?.id;
     }
     if (tagId) {
-      await supabase.from("portfolio_post_tags").insert({ post_id: postId, tag_id: tagId });
+      await supabase.from("portfolio_post_tags").insert({ post_image_id: imageId, tag_id: tagId });
     }
   }
 }

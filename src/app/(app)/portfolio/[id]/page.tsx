@@ -20,7 +20,7 @@ export default async function EditPortfolioPostPage({
   const { data: post } = await supabase
     .from("portfolio_posts")
     .select(
-      "id, title, description, link, price, topic, freelancer_id, portfolio_post_images(id, image_url, position), portfolio_post_tags(tags(name))",
+      "id, freelancer_id, portfolio_post_images(id, image_url, position, title, description, link, price, topic, portfolio_post_tags(tags(name)))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -32,13 +32,20 @@ export default async function EditPortfolioPostPage({
     getCategoryNames(),
   ]);
 
-  const images = [...post.portfolio_post_images]
+  const initialCards = [...post.portfolio_post_images]
     .sort((a, b) => a.position - b.position)
-    .map((img) => ({ id: img.id, url: img.image_url }));
-
-  const tags = post.portfolio_post_tags
-    .map((t) => (Array.isArray(t.tags) ? t.tags[0]?.name : (t.tags as { name: string })?.name))
-    .filter((n): n is string => Boolean(n));
+    .map((img) => ({
+      existingId: img.id,
+      url: img.image_url,
+      title: img.title,
+      description: img.description ?? "",
+      link: img.link ?? "",
+      price: img.price != null ? String(img.price) : "",
+      topic: img.topic ?? "",
+      tags: img.portfolio_post_tags
+        .map((t) => (Array.isArray(t.tags) ? t.tags[0]?.name : (t.tags as { name: string })?.name))
+        .filter((n): n is string => Boolean(n)),
+    }));
 
   return (
     <PortfolioForm
@@ -46,16 +53,7 @@ export default async function EditPortfolioPostPage({
       error={error}
       categoryNames={categoryNames}
       tagSuggestions={tagSuggestions}
-      postId={id}
-      initialValues={{
-        title: post.title,
-        description: post.description ?? "",
-        link: post.link ?? "",
-        price: post.price != null ? String(post.price) : "",
-        topic: post.topic ?? "",
-        tags,
-      }}
-      existingImages={images}
+      initialCards={initialCards}
       submitLabel="Lưu thay đổi"
     />
   );

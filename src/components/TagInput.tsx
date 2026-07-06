@@ -46,8 +46,6 @@ export default function TagInput({
 
   return (
     <div>
-      <input type="hidden" name="tags" value={tags.join(",")} />
-
       <div className="relative">
         <input
           value={input}

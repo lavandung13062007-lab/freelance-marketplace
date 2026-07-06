@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const topic = (searchParams.get("topic") ?? "").trim().toLowerCase();
-  const excludePostId = searchParams.get("exclude") ?? undefined;
+  const excludeImageId = searchParams.get("exclude") ?? undefined;
 
   if (!topic) {
     return NextResponse.json({ count: 0, min: null, max: null, avg: null });
@@ -12,21 +12,31 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient();
 
-  let query = supabase
+  const { data: approvedPosts } = await supabase
     .from("portfolio_posts")
-    .select("price")
-    .eq("topic", topic)
-    .eq("status", "approved")
-    .not("price", "is", null);
+    .select("id")
+    .eq("status", "approved");
 
-  if (excludePostId) {
-    query = query.neq("id", excludePostId);
+  const approvedIds = (approvedPosts ?? []).map((p) => p.id);
+  if (approvedIds.length === 0) {
+    return NextResponse.json({ count: 0, min: null, max: null, avg: null });
   }
 
-  const { data: posts } = await query;
+  let query = supabase
+    .from("portfolio_post_images")
+    .select("price, id")
+    .eq("topic", topic)
+    .in("post_id", approvedIds)
+    .not("price", "is", null);
 
-  const prices = (posts ?? [])
-    .map((p) => Number(p.price))
+  if (excludeImageId) {
+    query = query.neq("id", excludeImageId);
+  }
+
+  const { data: images } = await query;
+
+  const prices = (images ?? [])
+    .map((img) => Number(img.price))
     .filter((n) => Number.isFinite(n) && n > 0);
 
   if (prices.length === 0) {

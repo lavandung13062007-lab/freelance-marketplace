@@ -15,7 +15,7 @@ export default async function PortfolioPage() {
 
   const { data: posts } = await supabase
     .from("portfolio_posts")
-    .select("id, title, status, portfolio_post_images(image_url, position)")
+    .select("id, status, portfolio_post_images(image_url, position, title)")
     .eq("freelancer_id", user!.id)
     .order("created_at", { ascending: false });
 
@@ -58,12 +58,24 @@ export default async function PortfolioPage() {
                   )}
                   <div className="absolute inset-0 overflow-hidden rounded-2xl border-2 border-white bg-gray-200 shadow-md">
                     {images[0] && (
-                      <Image src={images[0].image_url} alt={post.title} fill className="object-cover" />
+                      <Image
+                        src={images[0].image_url}
+                        alt={images[0].title}
+                        fill
+                        className="object-cover"
+                      />
                     )}
                   </div>
+                  {isAlbum && (
+                    <span className="absolute right-1.5 top-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">
+                      {images.length} thẻ
+                    </span>
+                  )}
                 </div>
                 <div className="p-3">
-                  <p className="truncate text-sm font-semibold text-gray-900">{post.title}</p>
+                  <p className="truncate text-sm font-semibold text-gray-900">
+                    {images[0]?.title}
+                  </p>
                   <p className="mt-0.5 text-xs text-gray-500">{STATUS_LABEL[post.status]}</p>
                 </div>
               </Link>
