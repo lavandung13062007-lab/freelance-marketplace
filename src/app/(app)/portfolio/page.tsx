@@ -44,7 +44,11 @@ export default async function PortfolioPage() {
             );
             const cover = images[0]?.image_url;
             return (
-              <div key={post.id} className="overflow-hidden rounded-2xl bg-gray-50">
+              <Link
+                key={post.id}
+                href={`/portfolio/${post.id}`}
+                className="block overflow-hidden rounded-2xl bg-gray-50"
+              >
                 <div className="relative aspect-square bg-gray-200">
                   {cover && (
                     <Image src={cover} alt={post.title} fill className="object-cover" />
@@ -54,7 +58,7 @@ export default async function PortfolioPage() {
                   <p className="truncate text-sm font-semibold text-gray-900">{post.title}</p>
                   <p className="mt-0.5 text-xs text-gray-500">{STATUS_LABEL[post.status]}</p>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/session";
+import { getAllTagNames } from "@/lib/portfolio";
+import { createPortfolioPost } from "@/lib/actions/portfolio";
 import PortfolioForm from "./PortfolioForm";
 
 export default async function NewPortfolioPostPage({
@@ -16,16 +18,20 @@ export default async function NewPortfolioPostPage({
     .eq("freelancer_id", user!.id)
     .order("name");
 
+  const tagSuggestions = await getAllTagNames();
   const { error } = await searchParams;
 
   return (
-    <div className="max-w-lg">
+    <div>
       <h1 className="mb-6 text-xl font-extrabold tracking-tight text-gray-900">
         Đăng portfolio
       </h1>
       <PortfolioForm
+        action={createPortfolioPost}
         error={error}
         collectionNames={(collections ?? []).map((c) => c.name)}
+        tagSuggestions={tagSuggestions}
+        submitLabel="Đăng"
       />
     </div>
   );
