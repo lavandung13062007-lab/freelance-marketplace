@@ -16,7 +16,7 @@ export default function TagInput({
 
   const query = input.trim().toLowerCase();
   const filtered = query
-    ? suggestions.filter((s) => s.toLowerCase().includes(query) && !tags.includes(s)).slice(0, 6)
+    ? suggestions.filter((s) => s.toLowerCase().startsWith(query) && !tags.includes(s)).slice(0, 8)
     : [];
 
   function commitTag(raw: string) {
@@ -54,7 +54,7 @@ export default function TagInput({
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-          placeholder="VD: logo, thiệp cưới, poster sự kiện"
+          placeholder="VD: thiết kế logo, poster, banner mạng xã hội"
           className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20"
         />
         {showSuggestions && filtered.length > 0 && (

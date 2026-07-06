@@ -51,7 +51,7 @@ export default async function EditPortfolioPostPage({
         tags,
       }}
       existingImages={images}
-      imageMode="album"
+      imageMode={images.length > 1 ? "album" : "single"}
       submitLabel="Lưu thay đổi"
     />
   );

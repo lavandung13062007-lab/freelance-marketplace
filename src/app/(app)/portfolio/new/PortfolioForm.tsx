@@ -93,9 +93,7 @@ export default function PortfolioForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Từ khoá cốt lõi
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Chủ đề</label>
             <TagInput suggestions={tagSuggestions} tags={tags} onChange={setTags} />
           </div>
 

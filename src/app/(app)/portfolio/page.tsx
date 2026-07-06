@@ -33,22 +33,30 @@ export default async function PortfolioPage() {
           <p className="mt-1 text-sm text-gray-500">Đăng bộ ảnh đầu tiên của bạn</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {posts.map((post) => {
             const images = [...post.portfolio_post_images].sort(
               (a, b) => a.position - b.position,
             );
-            const cover = images[0]?.image_url;
+            const isAlbum = images.length > 1;
             return (
-              <Link
-                key={post.id}
-                href={`/portfolio/${post.id}`}
-                className="block overflow-hidden rounded-2xl bg-gray-50"
-              >
-                <div className="relative aspect-square bg-gray-200">
-                  {cover && (
-                    <Image src={cover} alt={post.title} fill className="object-cover" />
+              <Link key={post.id} href={`/portfolio/${post.id}`} className="block">
+                <div className="relative aspect-square">
+                  {isAlbum && images[2] && (
+                    <div className="absolute inset-0 translate-x-[6px] translate-y-[6px] rotate-6 overflow-hidden rounded-2xl border-2 border-white bg-gray-200 shadow-sm">
+                      <Image src={images[2].image_url} alt="" fill className="object-cover" />
+                    </div>
                   )}
+                  {isAlbum && images[1] && (
+                    <div className="absolute inset-0 -translate-x-[6px] translate-y-[6px] -rotate-6 overflow-hidden rounded-2xl border-2 border-white bg-gray-200 shadow-sm">
+                      <Image src={images[1].image_url} alt="" fill className="object-cover" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 overflow-hidden rounded-2xl border-2 border-white bg-gray-200 shadow-md">
+                    {images[0] && (
+                      <Image src={images[0].image_url} alt={post.title} fill className="object-cover" />
+                    )}
+                  </div>
                 </div>
                 <div className="p-3">
                   <p className="truncate text-sm font-semibold text-gray-900">{post.title}</p>
