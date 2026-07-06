@@ -6,6 +6,10 @@ export type PortfolioCard = {
   title: string;
   cover: string;
   freelancerId: string;
+  price: number | null;
+  description: string | null;
+  link: string | null;
+  topic: string | null;
 };
 
 export async function getApprovedPortfolioCards(freelancerId?: string): Promise<PortfolioCard[]> {
@@ -13,7 +17,9 @@ export async function getApprovedPortfolioCards(freelancerId?: string): Promise<
 
   let query = supabase
     .from("portfolio_posts")
-    .select("id, title, freelancer_id, portfolio_post_images(image_url, position)")
+    .select(
+      "id, title, description, link, price, topic, freelancer_id, portfolio_post_images(image_url, position)",
+    )
     .eq("status", "approved")
     .order("created_at", { ascending: false });
 
@@ -29,7 +35,16 @@ export async function getApprovedPortfolioCards(freelancerId?: string): Promise<
         (a, b) => a.position - b.position,
       )[0]?.image_url;
       return cover
-        ? { id: post.id, title: post.title, cover, freelancerId: post.freelancer_id }
+        ? {
+            id: post.id,
+            title: post.title,
+            cover,
+            freelancerId: post.freelancer_id,
+            price: post.price,
+            description: post.description,
+            link: post.link,
+            topic: post.topic,
+          }
         : null;
     })
     .filter((c): c is PortfolioCard => c !== null);

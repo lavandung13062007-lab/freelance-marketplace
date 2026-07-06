@@ -1,9 +1,13 @@
 import { getApprovedPortfolioCards } from "@/lib/portfolio";
 import PortfolioGrid from "@/components/PortfolioGrid";
 import TopSearchBar from "@/components/TopSearchBar";
+import { getCurrentUser } from "@/lib/supabase/session";
 
 export default async function DashboardPage() {
-  const cards = await getApprovedPortfolioCards();
+  const [cards, currentUser] = await Promise.all([
+    getApprovedPortfolioCards(),
+    getCurrentUser(),
+  ]);
 
   return (
     <div>
@@ -17,7 +21,7 @@ export default async function DashboardPage() {
           <p className="mt-1 text-sm text-gray-500">Ghé lại sau khi freelancer đăng bài nhé</p>
         </div>
       ) : (
-        <PortfolioGrid cards={cards} linkToFreelancer />
+        <PortfolioGrid cards={cards} linkToFreelancer currentUserId={currentUser?.id} />
       )}
     </div>
   );
