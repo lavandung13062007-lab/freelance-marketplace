@@ -49,7 +49,7 @@ export default async function FreelancerProfilePage({
           <p className="font-bold text-gray-900">Chưa có thiết kế nào</p>
         </div>
       ) : (
-        <PortfolioGrid cards={cards} currentUserId={currentUser?.id} />
+        <PortfolioGrid cards={cards} currentUserId={currentUser?.id ?? null} />
       )}
     </div>
   );

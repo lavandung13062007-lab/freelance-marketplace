@@ -7,6 +7,8 @@ const PROTECTED_PREFIXES = [
   "/profile",
   "/portfolio",
   "/freelancer",
+  "/design",
+  "/search",
 ];
 
 export async function updateSession(request: NextRequest) {

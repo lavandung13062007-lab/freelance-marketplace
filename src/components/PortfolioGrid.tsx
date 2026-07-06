@@ -10,11 +10,9 @@ function formatVND(n: number): string {
 
 export default function PortfolioGrid({
   cards,
-  linkToFreelancer = false,
   currentUserId,
 }: {
   cards: PortfolioCard[];
-  linkToFreelancer?: boolean;
   currentUserId?: string | null;
 }) {
   const router = useRouter();
@@ -27,8 +25,8 @@ export default function PortfolioGrid({
         return (
           <div
             key={card.id}
-            onClick={() => linkToFreelancer && router.push(`/freelancer/${card.freelancerId}`)}
-            className={`group break-inside-avoid ${linkToFreelancer ? "cursor-pointer" : ""}`}
+            onClick={() => router.push(`/design/${card.id}`)}
+            className="group cursor-pointer break-inside-avoid"
           >
             <div className="relative overflow-hidden rounded-2xl bg-gray-50">
               {/* eslint-disable-next-line @next/next/no-img-element */}
