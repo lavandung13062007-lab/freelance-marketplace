@@ -41,6 +41,16 @@ export async function getAllTagNames(): Promise<string[]> {
   return (data ?? []).map((t) => t.name);
 }
 
+export async function getCategoryNames(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("tags")
+    .select("name")
+    .eq("is_category", true)
+    .order("name");
+  return (data ?? []).map((t) => t.name);
+}
+
 export async function syncPostTags(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,

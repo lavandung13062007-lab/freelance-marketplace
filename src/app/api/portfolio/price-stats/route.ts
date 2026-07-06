@@ -3,46 +3,27 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const tagsParam = searchParams.get("tags") ?? "";
+  const topic = (searchParams.get("topic") ?? "").trim().toLowerCase();
   const excludePostId = searchParams.get("exclude") ?? undefined;
 
-  const tagNames = tagsParam
-    .split(",")
-    .map((t) => t.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (tagNames.length === 0) {
+  if (!topic) {
     return NextResponse.json({ count: 0, min: null, max: null, avg: null });
   }
 
   const supabase = await createClient();
 
-  const { data: tagRows } = await supabase.from("tags").select("id").in("name", tagNames);
-  const tagIds = (tagRows ?? []).map((t) => t.id);
-
-  if (tagIds.length === 0) {
-    return NextResponse.json({ count: 0, min: null, max: null, avg: null });
-  }
-
-  const { data: postTagRows } = await supabase
-    .from("portfolio_post_tags")
-    .select("post_id")
-    .in("tag_id", tagIds);
-
-  const postIds = Array.from(new Set((postTagRows ?? []).map((r) => r.post_id))).filter(
-    (id) => id !== excludePostId,
-  );
-
-  if (postIds.length === 0) {
-    return NextResponse.json({ count: 0, min: null, max: null, avg: null });
-  }
-
-  const { data: posts } = await supabase
+  let query = supabase
     .from("portfolio_posts")
     .select("price")
-    .in("id", postIds)
+    .eq("topic", topic)
     .eq("status", "approved")
     .not("price", "is", null);
+
+  if (excludePostId) {
+    query = query.neq("id", excludePostId);
+  }
+
+  const { data: posts } = await query;
 
   const prices = (posts ?? [])
     .map((p) => Number(p.price))

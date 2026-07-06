@@ -14,11 +14,11 @@ type Stats = { count: number; min: number | null; max: number | null; avg: numbe
 type Result = { key: string; stats: Stats };
 
 export default function PriceGuide({
-  tags,
+  topic,
   excludePostId,
   initialValue,
 }: {
-  tags: string[];
+  topic: string;
   excludePostId?: string;
   initialValue?: string;
 }) {
@@ -30,24 +30,24 @@ export default function PriceGuide({
       : Math.round(DEFAULT_MAX / 2 / STEP) * STEP;
   });
 
-  const tagsKey = tags.join(",");
-  const stats = tagsKey && result?.key === tagsKey ? result.stats : EMPTY_STATS;
-  const loading = Boolean(tagsKey) && result?.key !== tagsKey;
+  const topicKey = topic.trim().toLowerCase();
+  const stats = topicKey && result?.key === topicKey ? result.stats : EMPTY_STATS;
+  const loading = Boolean(topicKey) && result?.key !== topicKey;
 
   useEffect(() => {
-    if (!tagsKey) return;
+    if (!topicKey) return;
 
     const controller = new AbortController();
-    const params = new URLSearchParams({ tags: tagsKey });
+    const params = new URLSearchParams({ topic: topicKey });
     if (excludePostId) params.set("exclude", excludePostId);
 
     fetch(`/api/portfolio/price-stats?${params.toString()}`, { signal: controller.signal })
       .then((res) => res.json())
-      .then((data: Stats) => setResult({ key: tagsKey, stats: data }))
-      .catch(() => setResult({ key: tagsKey, stats: EMPTY_STATS }));
+      .then((data: Stats) => setResult({ key: topicKey, stats: data }))
+      .catch(() => setResult({ key: topicKey, stats: EMPTY_STATS }));
 
     return () => controller.abort();
-  }, [tagsKey, excludePostId]);
+  }, [topicKey, excludePostId]);
 
   const sliderMax =
     stats.max != null
@@ -77,10 +77,12 @@ export default function PriceGuide({
 
       <p className="mb-3 text-xs text-gray-400">
         {stats.count > 0 && stats.min != null && stats.max != null
-          ? `Freelancer khác từng nhận ${formatVND(stats.min)} – ${formatVND(stats.max)} ₫ cho từ khoá này, trung bình ${formatVND(stats.avg ?? 0)} ₫`
+          ? `Freelancer khác từng nhận ${formatVND(stats.min)} – ${formatVND(stats.max)} ₫ cho chủ đề này, trung bình ${formatVND(stats.avg ?? 0)} ₫`
           : loading
             ? "Đang tải mức giá tham khảo…"
-            : "Chưa có dữ liệu giá cho từ khoá này"}
+            : topicKey
+              ? "Chưa có dữ liệu giá cho chủ đề này"
+              : "Chọn chủ đề để xem giá tham khảo"}
       </p>
 
       <input type="hidden" name="price" value={displayPrice} />

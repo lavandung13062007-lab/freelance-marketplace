@@ -1,21 +1,24 @@
-import { getAllTagNames } from "@/lib/portfolio";
+import { getAllTagNames, getCategoryNames } from "@/lib/portfolio";
 import { createPortfolioPost } from "@/lib/actions/portfolio";
 import PortfolioForm from "./PortfolioForm";
 
 export default async function NewPortfolioPostPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; mode?: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const tagSuggestions = await getAllTagNames();
-  const { error, mode } = await searchParams;
+  const [tagSuggestions, categoryNames] = await Promise.all([
+    getAllTagNames(),
+    getCategoryNames(),
+  ]);
+  const { error } = await searchParams;
 
   return (
     <PortfolioForm
       action={createPortfolioPost}
       error={error}
+      categoryNames={categoryNames}
       tagSuggestions={tagSuggestions}
-      imageMode={mode === "single" ? "single" : "album"}
       submitLabel="Đăng"
     />
   );

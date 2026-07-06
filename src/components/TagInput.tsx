@@ -6,13 +6,16 @@ export default function TagInput({
   suggestions,
   tags,
   onChange,
+  maxTags = 20,
 }: {
   suggestions: string[];
   tags: string[];
   onChange: (tags: string[]) => void;
+  maxTags?: number;
 }) {
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const atLimit = tags.length >= maxTags;
 
   const query = input.trim().toLowerCase();
   const filtered = query
@@ -20,6 +23,7 @@ export default function TagInput({
     : [];
 
   function commitTag(raw: string) {
+    if (atLimit) return;
     const name = raw.trim().toLowerCase();
     if (!name) return;
     if (!tags.includes(name)) onChange([...tags, name]);
@@ -47,6 +51,7 @@ export default function TagInput({
       <div className="relative">
         <input
           value={input}
+          disabled={atLimit}
           onChange={(e) => {
             setInput(e.target.value);
             setShowSuggestions(true);
@@ -54,10 +59,10 @@ export default function TagInput({
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-          placeholder="VD: thiết kế logo, poster, banner mạng xã hội"
-          className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20"
+          placeholder={atLimit ? "" : "VD: tối giản, cho quán cafe, pastel"}
+          className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20 disabled:text-gray-400"
         />
-        {showSuggestions && filtered.length > 0 && (
+        {showSuggestions && !atLimit && filtered.length > 0 && (
           <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg">
             {filtered.map((s) => (
               <button
@@ -73,6 +78,10 @@ export default function TagInput({
           </div>
         )}
       </div>
+
+      <p className="mt-1 text-xs text-gray-400">
+        {atLimit ? "Đã đạt tối đa 20 thẻ" : `${tags.length}/${maxTags} thẻ`}
+      </p>
 
       {tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">

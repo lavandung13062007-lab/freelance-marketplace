@@ -15,7 +15,12 @@ function parseTags(raw: string): string[] {
         .map((t) => t.trim().toLowerCase())
         .filter(Boolean),
     ),
-  );
+  ).slice(0, 20);
+}
+
+function parseTopic(raw: string): string | null {
+  const trimmed = raw.trim().toLowerCase();
+  return trimmed || null;
 }
 
 function parsePrice(raw: string): string | null {
@@ -31,6 +36,7 @@ export async function createPortfolioPost(formData: FormData) {
   const description = (formData.get("description") as string)?.trim() || null;
   const link = (formData.get("link") as string)?.trim() || null;
   const price = parsePrice((formData.get("price") as string) ?? "");
+  const topic = parseTopic((formData.get("topic") as string) ?? "");
   const tagsRaw = (formData.get("tags") as string) ?? "";
   const files = formData
     .getAll("images")
@@ -67,6 +73,7 @@ export async function createPortfolioPost(formData: FormData) {
       description,
       link,
       price,
+      topic,
     })
     .select("id")
     .single();
@@ -96,6 +103,7 @@ export async function updatePortfolioPost(postId: string, formData: FormData) {
   const description = (formData.get("description") as string)?.trim() || null;
   const link = (formData.get("link") as string)?.trim() || null;
   const price = parsePrice((formData.get("price") as string) ?? "");
+  const topic = parseTopic((formData.get("topic") as string) ?? "");
   const tagsRaw = (formData.get("tags") as string) ?? "";
   const keepImageIds = ((formData.get("keepImageIds") as string) ?? "")
     .split(",")
@@ -164,12 +172,14 @@ export async function updatePortfolioPost(postId: string, formData: FormData) {
     description: string | null;
     link: string | null;
     price: string | null;
+    topic: string | null;
     status?: "pending";
   } = {
     title,
     description,
     link,
     price,
+    topic,
   };
   if (imagesChanged) {
     updates.status = "pending";

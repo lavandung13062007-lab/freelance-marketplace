@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/session";
-import { getAllTagNames } from "@/lib/portfolio";
+import { getAllTagNames, getCategoryNames } from "@/lib/portfolio";
 import { updatePortfolioPost } from "@/lib/actions/portfolio";
 import PortfolioForm from "../new/PortfolioForm";
 
@@ -20,14 +20,17 @@ export default async function EditPortfolioPostPage({
   const { data: post } = await supabase
     .from("portfolio_posts")
     .select(
-      "id, title, description, link, price, freelancer_id, portfolio_post_images(id, image_url, position), portfolio_post_tags(tags(name))",
+      "id, title, description, link, price, topic, freelancer_id, portfolio_post_images(id, image_url, position), portfolio_post_tags(tags(name))",
     )
     .eq("id", id)
     .maybeSingle();
 
   if (!post || post.freelancer_id !== user!.id) notFound();
 
-  const tagSuggestions = await getAllTagNames();
+  const [tagSuggestions, categoryNames] = await Promise.all([
+    getAllTagNames(),
+    getCategoryNames(),
+  ]);
 
   const images = [...post.portfolio_post_images]
     .sort((a, b) => a.position - b.position)
@@ -41,6 +44,7 @@ export default async function EditPortfolioPostPage({
     <PortfolioForm
       action={updatePortfolioPost.bind(null, id)}
       error={error}
+      categoryNames={categoryNames}
       tagSuggestions={tagSuggestions}
       postId={id}
       initialValues={{
@@ -48,10 +52,10 @@ export default async function EditPortfolioPostPage({
         description: post.description ?? "",
         link: post.link ?? "",
         price: post.price != null ? String(post.price) : "",
+        topic: post.topic ?? "",
         tags,
       }}
       existingImages={images}
-      imageMode={images.length > 1 ? "album" : "single"}
       submitLabel="Lưu thay đổi"
     />
   );

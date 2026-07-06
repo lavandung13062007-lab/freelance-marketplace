@@ -28,10 +28,8 @@ function ChevronIcon({ direction }: { direction: "left" | "right" }) {
 
 export default function PortfolioImageManager({
   initialImages = [],
-  mode = "album",
 }: {
   initialImages?: ExistingImage[];
-  mode?: "single" | "album";
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<Item[]>(
@@ -52,7 +50,7 @@ export default function PortfolioImageManager({
       (file): Item => ({ kind: "new", file, previewUrl: URL.createObjectURL(file) }),
     );
     if (picked.length === 0) return;
-    const next = mode === "single" ? picked : [...items, ...picked];
+    const next = [...items, ...picked];
     setItems(next);
     syncFileInput(next);
     setSelected(next.length - 1);
@@ -82,109 +80,77 @@ export default function PortfolioImageManager({
         type="file"
         name="images"
         accept="image/*"
-        multiple={mode === "album"}
+        multiple
         onChange={handlePick}
         className="hidden"
       />
 
-      {mode === "single" ? (
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          className="relative flex aspect-square w-full max-w-md cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-brand"
-        >
-          {active ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={active.kind === "existing" ? active.url : active.previewUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(0);
-                }}
-                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-sm text-white"
-              >
-                ✕
-              </button>
-            </>
-          ) : (
-            <span className="text-5xl font-light leading-none text-gray-300">+</span>
-          )}
-        </div>
-      ) : (
-        <>
-          <div className="relative flex max-h-[520px] min-h-[320px] items-center justify-center overflow-hidden rounded-2xl bg-gray-50">
-            {active ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={active.kind === "existing" ? active.url : active.previewUrl}
-                alt=""
-                className="max-h-[520px] w-full object-contain"
-              />
-            ) : (
-              <span className="text-sm text-gray-400">Chưa có ảnh</span>
-            )}
-            {items.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => goTo(-1)}
-                  className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow hover:bg-white"
-                >
-                  <ChevronIcon direction="left" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => goTo(1)}
-                  className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow hover:bg-white"
-                >
-                  <ChevronIcon direction="right" />
-                </button>
-              </>
-            )}
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {items.map((it, i) => (
-              <div
-                key={it.kind === "existing" ? it.id : it.previewUrl}
-                onClick={() => setSelected(i)}
-                className={`relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-xl ${
-                  i === selected ? "ring-2 ring-brand ring-offset-2" : ""
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={it.kind === "existing" ? it.url : it.previewUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove(i);
-                  }}
-                  className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-[10px] leading-none text-white"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+      <div className="relative flex max-h-[520px] min-h-[320px] items-center justify-center overflow-hidden rounded-2xl bg-gray-50">
+        {active ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={active.kind === "existing" ? active.url : active.previewUrl}
+            alt=""
+            className="max-h-[520px] w-full object-contain"
+          />
+        ) : (
+          <span className="text-sm text-gray-400">Chưa có ảnh</span>
+        )}
+        {items.length > 1 && (
+          <>
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-brand hover:text-brand"
+              onClick={() => goTo(-1)}
+              className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow hover:bg-white"
             >
-              <span className="text-lg leading-none">+</span>
+              <ChevronIcon direction="left" />
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo(1)}
+              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow hover:bg-white"
+            >
+              <ChevronIcon direction="right" />
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {items.map((it, i) => (
+          <div
+            key={it.kind === "existing" ? it.id : it.previewUrl}
+            onClick={() => setSelected(i)}
+            className={`relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-xl ${
+              i === selected ? "ring-2 ring-brand ring-offset-2" : ""
+            }`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={it.kind === "existing" ? it.url : it.previewUrl}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemove(i);
+              }}
+              className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-[10px] leading-none text-white"
+            >
+              ✕
             </button>
           </div>
-        </>
-      )}
+        ))}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-brand hover:text-brand"
+        >
+          <span className="text-lg leading-none">+</span>
+        </button>
+      </div>
     </div>
   );
 }

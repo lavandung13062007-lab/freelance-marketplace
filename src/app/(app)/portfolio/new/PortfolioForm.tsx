@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import PortfolioImageManager, { type ExistingImage } from "@/components/PortfolioImageManager";
 import TagInput from "@/components/TagInput";
+import TopicSelect from "@/components/TopicSelect";
 import PriceGuide from "@/components/PriceGuide";
 import SubmitButton from "@/components/SubmitButton";
 
@@ -20,28 +21,30 @@ export type PortfolioFormValues = {
   description: string;
   link: string;
   price: string;
+  topic: string;
   tags: string[];
 };
 
 export default function PortfolioForm({
   action,
   error,
+  categoryNames,
   tagSuggestions,
   initialValues,
   existingImages,
-  imageMode = "album",
   postId,
   submitLabel,
 }: {
   action: (formData: FormData) => void;
   error?: string;
+  categoryNames: string[];
   tagSuggestions: string[];
   initialValues?: PortfolioFormValues;
   existingImages?: ExistingImage[];
-  imageMode?: "single" | "album";
   postId?: string;
   submitLabel: string;
 }) {
+  const [topic, setTopic] = useState<string>(initialValues?.topic ?? "");
   const [tags, setTags] = useState<string[]>(initialValues?.tags ?? []);
 
   return (
@@ -94,12 +97,21 @@ export default function PortfolioForm({
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Chủ đề</label>
-            <TagInput suggestions={tagSuggestions} tags={tags} onChange={setTags} />
+            <TopicSelect categories={categoryNames} value={topic} onChange={setTopic} />
+            <p className="mt-1 text-xs text-gray-400">
+              Chọn 1 chủ đề để xem mức giá thị trường phù hợp
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Gắn thẻ</label>
+            <TagInput suggestions={tagSuggestions} tags={tags} onChange={setTags} maxTags={20} />
+            <p className="mt-1 text-xs text-gray-400">Giúp khách lọc tìm kiếm dễ hơn</p>
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Giá (VNĐ)</label>
-            <PriceGuide tags={tags} excludePostId={postId} initialValue={initialValues?.price} />
+            <PriceGuide topic={topic} excludePostId={postId} initialValue={initialValues?.price} />
           </div>
 
           {error && <p className="text-sm font-medium text-brand">{error}</p>}
@@ -109,7 +121,7 @@ export default function PortfolioForm({
 
         <div className="max-w-xl flex-1">
           <label className="mb-1 block text-sm font-medium text-gray-700">Ảnh</label>
-          <PortfolioImageManager initialImages={existingImages ?? []} mode={imageMode} />
+          <PortfolioImageManager initialImages={existingImages ?? []} />
         </div>
       </form>
     </div>
