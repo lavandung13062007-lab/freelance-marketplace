@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/session";
-import { findOrCreateCollection, syncPostTags } from "@/lib/portfolio";
+import { syncPostTags } from "@/lib/portfolio";
 
 function parseTags(raw: string): string[] {
   return Array.from(
@@ -31,7 +31,6 @@ export async function createPortfolioPost(formData: FormData) {
   const description = (formData.get("description") as string)?.trim() || null;
   const link = (formData.get("link") as string)?.trim() || null;
   const price = parsePrice((formData.get("price") as string) ?? "");
-  const collectionName = (formData.get("collection") as string)?.trim();
   const tagsRaw = (formData.get("tags") as string) ?? "";
   const files = formData
     .getAll("images")
@@ -60,15 +59,10 @@ export async function createPortfolioPost(formData: FormData) {
     imageUrls.push(data.publicUrl);
   }
 
-  const collectionId = collectionName
-    ? await findOrCreateCollection(supabase, user.id, collectionName)
-    : null;
-
   const { data: post, error: postError } = await supabase
     .from("portfolio_posts")
     .insert({
       freelancer_id: user.id,
-      collection_id: collectionId,
       title,
       description,
       link,
@@ -102,7 +96,6 @@ export async function updatePortfolioPost(postId: string, formData: FormData) {
   const description = (formData.get("description") as string)?.trim() || null;
   const link = (formData.get("link") as string)?.trim() || null;
   const price = parsePrice((formData.get("price") as string) ?? "");
-  const collectionName = (formData.get("collection") as string)?.trim();
   const tagsRaw = (formData.get("tags") as string) ?? "";
   const keepImageIds = ((formData.get("keepImageIds") as string) ?? "")
     .split(",")
@@ -166,23 +159,17 @@ export async function updatePortfolioPost(postId: string, formData: FormData) {
     );
   }
 
-  const collectionId = collectionName
-    ? await findOrCreateCollection(supabase, user.id, collectionName)
-    : null;
-
   const updates: {
     title: string;
     description: string | null;
     link: string | null;
     price: string | null;
-    collection_id: string | null;
     status?: "pending";
   } = {
     title,
     description,
     link,
     price,
-    collection_id: collectionId,
   };
   if (imagesChanged) {
     updates.status = "pending";

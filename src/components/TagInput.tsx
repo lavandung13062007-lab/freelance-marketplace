@@ -4,12 +4,13 @@ import { useState } from "react";
 
 export default function TagInput({
   suggestions,
-  initialTags = [],
+  tags,
+  onChange,
 }: {
   suggestions: string[];
-  initialTags?: string[];
+  tags: string[];
+  onChange: (tags: string[]) => void;
 }) {
-  const [tags, setTags] = useState<string[]>(initialTags);
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -21,7 +22,7 @@ export default function TagInput({
   function commitTag(raw: string) {
     const name = raw.trim().toLowerCase();
     if (!name) return;
-    setTags((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    if (!tags.includes(name)) onChange([...tags, name]);
     setInput("");
     setShowSuggestions(false);
   }
@@ -31,12 +32,12 @@ export default function TagInput({
       e.preventDefault();
       commitTag(input);
     } else if (e.key === "Backspace" && input === "" && tags.length > 0) {
-      setTags((prev) => prev.slice(0, -1));
+      onChange(tags.slice(0, -1));
     }
   }
 
   function removeTag(name: string) {
-    setTags((prev) => prev.filter((t) => t !== name));
+    onChange(tags.filter((t) => t !== name));
   }
 
   return (
@@ -53,7 +54,7 @@ export default function TagInput({
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-          placeholder="Gõ tên thẻ, nhấn Enter để thêm"
+          placeholder="VD: logo, thiệp cưới, poster sự kiện"
           className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20"
         />
         {showSuggestions && filtered.length > 0 && (

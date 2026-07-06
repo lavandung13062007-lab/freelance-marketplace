@@ -20,18 +20,12 @@ export default async function EditPortfolioPostPage({
   const { data: post } = await supabase
     .from("portfolio_posts")
     .select(
-      "id, title, description, link, price, freelancer_id, portfolio_collections(name), portfolio_post_images(id, image_url, position), portfolio_post_tags(tags(name))",
+      "id, title, description, link, price, freelancer_id, portfolio_post_images(id, image_url, position), portfolio_post_tags(tags(name))",
     )
     .eq("id", id)
     .maybeSingle();
 
   if (!post || post.freelancer_id !== user!.id) notFound();
-
-  const { data: collections } = await supabase
-    .from("portfolio_collections")
-    .select("name")
-    .eq("freelancer_id", user!.id)
-    .order("name");
 
   const tagSuggestions = await getAllTagNames();
 
@@ -43,31 +37,22 @@ export default async function EditPortfolioPostPage({
     .map((t) => (Array.isArray(t.tags) ? t.tags[0]?.name : (t.tags as { name: string })?.name))
     .filter((n): n is string => Boolean(n));
 
-  const collectionName = Array.isArray(post.portfolio_collections)
-    ? post.portfolio_collections[0]?.name
-    : (post.portfolio_collections as { name: string } | null)?.name;
-
   return (
-    <div>
-      <h1 className="mb-6 text-xl font-extrabold tracking-tight text-gray-900">
-        Chỉnh sửa portfolio
-      </h1>
-      <PortfolioForm
-        action={updatePortfolioPost.bind(null, id)}
-        error={error}
-        collectionNames={(collections ?? []).map((c) => c.name)}
-        tagSuggestions={tagSuggestions}
-        initialValues={{
-          title: post.title,
-          description: post.description ?? "",
-          link: post.link ?? "",
-          price: post.price != null ? String(post.price) : "",
-          collection: collectionName ?? "",
-          tags,
-        }}
-        existingImages={images}
-        submitLabel="Lưu thay đổi"
-      />
-    </div>
+    <PortfolioForm
+      action={updatePortfolioPost.bind(null, id)}
+      error={error}
+      tagSuggestions={tagSuggestions}
+      postId={id}
+      initialValues={{
+        title: post.title,
+        description: post.description ?? "",
+        link: post.link ?? "",
+        price: post.price != null ? String(post.price) : "",
+        tags,
+      }}
+      existingImages={images}
+      imageMode="album"
+      submitLabel="Lưu thay đổi"
+    />
   );
 }

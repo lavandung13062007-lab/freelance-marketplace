@@ -41,30 +41,6 @@ export async function getAllTagNames(): Promise<string[]> {
   return (data ?? []).map((t) => t.name);
 }
 
-export async function findOrCreateCollection(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: SupabaseClient<any>,
-  freelancerId: string,
-  name: string,
-): Promise<string> {
-  const { data: existing } = await supabase
-    .from("portfolio_collections")
-    .select("id")
-    .eq("freelancer_id", freelancerId)
-    .eq("name", name)
-    .maybeSingle();
-
-  if (existing) return existing.id;
-
-  const { data: created } = await supabase
-    .from("portfolio_collections")
-    .insert({ freelancer_id: freelancerId, name })
-    .select("id")
-    .single();
-
-  return created!.id;
-}
-
 export async function syncPostTags(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,
