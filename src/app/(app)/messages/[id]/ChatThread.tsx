@@ -67,7 +67,10 @@ export default function ChatThread({
 
   return (
     <div className="flex h-full flex-col rounded-3xl bg-gray-50">
-      <div className="border-b border-gray-100 px-5 py-3">
+      <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-yellow text-base font-bold text-gray-900">
+          {otherName.charAt(0).toUpperCase() || "?"}
+        </span>
         <p className="font-bold text-gray-900">{otherName}</p>
       </div>
 
