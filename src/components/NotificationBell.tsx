@@ -21,9 +21,14 @@ export default function NotificationBell() {
         onClick={() => setOpen((v) => !v)}
         aria-label="Thông báo"
         title="Thông báo"
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 hover:bg-gray-50"
+        className="flex h-10 w-full items-center rounded-xl text-gray-500 hover:bg-gray-50"
       >
-        <BellIcon />
+        <span className="flex w-10 shrink-0 items-center justify-center">
+          <BellIcon />
+        </span>
+        <span className="pointer-events-none ml-1 whitespace-nowrap text-sm font-medium opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+          Thông báo
+        </span>
       </button>
 
       {open && (

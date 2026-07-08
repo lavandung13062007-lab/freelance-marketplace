@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/lib/actions/auth";
@@ -49,57 +48,38 @@ const NAV_ITEMS = [
   { href: "/messages", label: "Tin nhắn", Icon: MessageIcon },
 ];
 
-const STORAGE_KEY = "fm:sidebar-expanded";
+// Nhãn chỉ hiện khi di chuột vào sidebar (group-hover). pointer-events-none để
+// phần chữ tràn ra ngoài lúc thu gọn không che mất nội dung bên cạnh.
+const LABEL =
+  "pointer-events-none ml-1 whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100";
 
 export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
   const pathname = usePathname();
-  const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    // Đọc trạng thái đã lưu sau khi vào trang, tránh lệch giữa render trên server và trình duyệt.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (localStorage.getItem(STORAGE_KEY) === "true") setExpanded(true);
-  }, []);
-
-  function toggleExpanded() {
-    setExpanded((prev) => {
-      const next = !prev;
-      localStorage.setItem(STORAGE_KEY, String(next));
-      return next;
-    });
-  }
 
   return (
-    <aside
-      className={`flex h-screen shrink-0 flex-col border-r border-gray-100 py-5 transition-[width] duration-200 ${
-        expanded ? "w-56 px-3" : "w-16 items-center"
-      }`}
-    >
-      <button
-        type="button"
-        onClick={toggleExpanded}
-        title={expanded ? "Thu gọn menu" : "Mở rộng menu"}
-        className={`mb-4 flex items-center rounded-xl hover:bg-gray-50 ${expanded ? "gap-2 px-1 py-1" : "justify-center"}`}
-      >
-        <span className="relative flex h-6 w-8 shrink-0 items-center">
+    <aside className="group flex h-screen w-16 shrink-0 flex-col border-r border-gray-100 px-3 py-5 transition-[width] duration-200 ease-out hover:w-56">
+      <Link href="/dashboard" title="Sàn Freelance" className="mb-4 flex h-9 items-center rounded-xl">
+        <span className="flex w-10 shrink-0 items-center">
           <span className="h-6 w-6 rounded-full bg-brand" />
           <span className="-ml-2 h-6 w-2 rounded-full bg-brand-yellow" />
         </span>
-        {expanded && <span className="truncate text-sm font-bold text-gray-900">Sàn Freelance</span>}
-      </button>
+        <span className={`${LABEL} text-sm font-bold text-gray-900`}>Sàn Freelance</span>
+      </Link>
 
       <Link
         href="/portfolio"
         title="Portfolio"
-        className={`mb-4 flex h-10 items-center rounded-2xl shadow-sm ${expanded ? "gap-2 px-3" : "w-10 justify-center"} ${
+        className={`mb-4 flex h-10 items-center rounded-2xl shadow-sm ${
           pathname === "/portfolio" ? "bg-brand text-white" : "bg-brand/10 text-brand hover:bg-brand/15"
         }`}
       >
-        <PortfolioIcon />
-        {expanded && <span className="text-sm font-semibold">Portfolio</span>}
+        <span className="flex w-10 shrink-0 items-center justify-center">
+          <PortfolioIcon />
+        </span>
+        <span className={`${LABEL} text-sm font-semibold`}>Portfolio</span>
       </Link>
 
-      <nav className={`flex flex-col gap-1 ${expanded ? "" : "items-center"}`}>
+      <nav className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const active = pathname === href;
           return (
@@ -107,38 +87,36 @@ export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?:
               key={href}
               href={href}
               title={label}
-              className={`flex h-10 items-center rounded-xl ${expanded ? "gap-2 px-3" : "w-10 justify-center"} ${
+              className={`flex h-10 items-center rounded-xl ${
                 active ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-gray-50"
               }`}
             >
-              <Icon />
-              {expanded && <span className="text-sm font-medium">{label}</span>}
+              <span className="flex w-10 shrink-0 items-center justify-center">
+                <Icon />
+              </span>
+              <span className={`${LABEL} text-sm font-medium`}>{label}</span>
             </Link>
           );
         })}
-        <div className={expanded ? "px-3" : ""}>
-          <NotificationBell />
-        </div>
+        <NotificationBell />
       </nav>
 
-      <div className={`mt-auto flex flex-col gap-1 ${expanded ? "" : "items-center"}`}>
-        <Link
-          href="/profile"
-          title="Hồ sơ"
-          className={`flex items-center rounded-xl hover:bg-gray-50 ${expanded ? "gap-2 px-1 py-1" : "justify-center"}`}
-        >
-          <Avatar name={name} avatarUrl={avatarUrl} size="h-9 w-9 text-sm" />
-          {expanded && <span className="truncate text-sm font-semibold text-gray-900">{name}</span>}
+      <div className="mt-auto flex flex-col gap-1">
+        <Link href="/profile" title="Hồ sơ" className="flex h-11 items-center rounded-xl hover:bg-gray-50">
+          <span className="flex w-10 shrink-0 items-center justify-center">
+            <Avatar name={name} avatarUrl={avatarUrl} size="h-9 w-9 text-sm" />
+          </span>
+          <span className={`${LABEL} truncate text-sm font-semibold text-gray-900`}>{name}</span>
         </Link>
         <form action={logout}>
           <button
             title="Thoát"
-            className={`flex h-9 items-center rounded-xl text-gray-400 hover:bg-gray-50 hover:text-gray-600 ${
-              expanded ? "w-full gap-2 px-3" : "w-9 justify-center"
-            }`}
+            className="flex h-10 w-full items-center rounded-xl text-gray-400 hover:bg-gray-50 hover:text-gray-600"
           >
-            <LogoutIcon />
-            {expanded && <span className="text-sm font-medium">Thoát</span>}
+            <span className="flex w-10 shrink-0 items-center justify-center">
+              <LogoutIcon />
+            </span>
+            <span className={`${LABEL} text-sm font-medium`}>Thoát</span>
           </button>
         </form>
       </div>

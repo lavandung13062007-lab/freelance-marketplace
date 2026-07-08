@@ -17,7 +17,7 @@ export default async function SearchPage({
 
   return (
     <div>
-      <div className="sticky top-0 z-20 -mx-8 -mt-6 mb-4 border-b border-gray-100 bg-white px-8 pb-3 pt-0">
+      <div className="sticky -top-6 z-20 -mx-8 mb-4 border-b border-gray-100 bg-white px-8 pb-3 pt-4">
         <TopSearchBar />
       </div>
 
