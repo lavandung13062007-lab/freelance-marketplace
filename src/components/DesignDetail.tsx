@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { CardDetail, PortfolioCard } from "@/lib/portfolio";
@@ -45,13 +45,27 @@ export default function DesignDetail({
   detail,
   currentUserId,
   freelancerCards,
+  basePath = "/design",
 }: {
   detail: CardDetail;
   currentUserId?: string | null;
   freelancerCards: PortfolioCard[];
+  basePath?: string;
 }) {
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
   const canMessage = Boolean(currentUserId) && currentUserId !== detail.freelancer.id;
+
+  async function handleShare() {
+    const url = `${window.location.origin}/share/${detail.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // trình duyệt không hỗ trợ clipboard — bỏ qua, không có gì để hiển thị lỗi
+    }
+  }
 
   useEffect(() => {
     recordInterest(detail.topic, detail.tags);
@@ -66,7 +80,7 @@ export default function DesignDetail({
     const n = detail.siblings.length;
     if (n === 0) return;
     const next = detail.siblings[(index + delta + n) % n];
-    if (next && next.id !== detail.id) router.push(`/design/${next.id}`);
+    if (next && next.id !== detail.id) router.push(`${basePath}/${next.id}`);
   }
 
   const excludeForFeed = useMemo(
@@ -134,7 +148,7 @@ export default function DesignDetail({
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => s.id !== detail.id && router.push(`/design/${s.id}`)}
+                  onClick={() => s.id !== detail.id && router.push(`${basePath}/${s.id}`)}
                   className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl ${
                     s.id === detail.id ? "ring-2 ring-brand ring-offset-2" : ""
                   }`}
@@ -188,6 +202,13 @@ export default function DesignDetail({
                 Xem liên kết
               </a>
             )}
+            <button
+              type="button"
+              onClick={handleShare}
+              className="rounded-full border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+            >
+              {copied ? "Đã sao chép ✓" : "Chia sẻ"}
+            </button>
             {canMessage && (
               <MessageButton
                 freelancerId={detail.freelancer.id}
