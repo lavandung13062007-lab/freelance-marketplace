@@ -17,3 +17,24 @@ export function timeAgo(iso: string): string {
   const d = new Date(then);
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 }
+
+// Mốc thời gian giữa các cụm tin nhắn trong khung chat, kiểu Zalo.
+export function formatDivider(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const time = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
+  if (d.toDateString() === now.toDateString()) return time;
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return `Hôm qua ${time}`;
+
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
+  if (diffDays < 7) {
+    const days = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+    return `${days[d.getDay()]} ${time}`;
+  }
+
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${time}`;
+}

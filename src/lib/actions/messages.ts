@@ -67,3 +67,121 @@ export async function sendMessage(conversationId: string, content: string) {
   revalidatePath("/messages");
   return data;
 }
+
+export async function markConversationRead(conversationId: string) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const supabase = await createClient();
+  await supabase.from("conversation_reads").upsert(
+    {
+      conversation_id: conversationId,
+      user_id: user.id,
+      last_read_at: new Date().toISOString(),
+      hidden_at: null,
+    },
+    { onConflict: "conversation_id,user_id" },
+  );
+
+  revalidatePath("/messages");
+}
+
+export async function setConversationPinned(conversationId: string, pinned: boolean) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const supabase = await createClient();
+  await supabase.from("conversation_reads").upsert(
+    {
+      conversation_id: conversationId,
+      user_id: user.id,
+      pinned_at: pinned ? new Date().toISOString() : null,
+    },
+    { onConflict: "conversation_id,user_id" },
+  );
+
+  revalidatePath("/messages");
+}
+
+export async function hideConversation(conversationId: string) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const supabase = await createClient();
+  await supabase.from("conversation_reads").upsert(
+    {
+      conversation_id: conversationId,
+      user_id: user.id,
+      hidden_at: new Date().toISOString(),
+    },
+    { onConflict: "conversation_id,user_id" },
+  );
+
+  revalidatePath("/messages");
+}
+
+export async function setNickname(conversationId: string, nickname: string) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const trimmed = nickname.trim();
+  const supabase = await createClient();
+  await supabase.from("conversation_reads").upsert(
+    {
+      conversation_id: conversationId,
+      user_id: user.id,
+      nickname: trimmed || null,
+    },
+    { onConflict: "conversation_id,user_id" },
+  );
+
+  revalidatePath("/messages");
+}
+
+const REPORT_REASONS = ["spam", "harassment", "scam", "other"] as const;
+
+export async function reportConversation(conversationId: string, reason: string) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const supabase = await createClient();
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("user_a, user_b")
+    .eq("id", conversationId)
+    .maybeSingle();
+  if (!conversation) return;
+
+  const reportedUserId = conversation.user_a === user.id ? conversation.user_b : conversation.user_a;
+  const safeReason = (REPORT_REASONS as readonly string[]).includes(reason) ? reason : "other";
+
+  await supabase.from("conversation_reports").insert({
+    conversation_id: conversationId,
+    reporter_id: user.id,
+    reported_user_id: reportedUserId,
+    reason: safeReason,
+  });
+}
+
+const CONVERSATION_STATUSES = ["discussing", "hired", "completed", "cancelled"] as const;
+
+export async function setConversationStatus(conversationId: string, status: string) {
+  const user = await getCurrentUser();
+  if (!user) return;
+  if (!(CONVERSATION_STATUSES as readonly string[]).includes(status)) return;
+
+  const supabase = await createClient();
+  await supabase.from("conversations").update({ status }).eq("id", conversationId);
+
+  revalidatePath("/messages");
+}
+
+export async function setAgreedPrice(conversationId: string, price: number | null) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const supabase = await createClient();
+  await supabase.from("conversations").update({ agreed_price: price }).eq("id", conversationId);
+
+  revalidatePath("/messages");
+}
