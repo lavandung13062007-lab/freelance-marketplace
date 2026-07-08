@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/session";
 import { getApprovedPortfolioCards } from "@/lib/portfolio";
 import PortfolioGrid from "@/components/PortfolioGrid";
+import ShareButton from "@/components/ShareButton";
 import { startConversation } from "@/lib/actions/messages";
 
 export default async function FreelancerProfilePage({
@@ -34,6 +35,7 @@ export default async function FreelancerProfilePage({
           <p className="text-lg font-extrabold text-gray-900">{profile.full_name}</p>
           <p className="text-sm text-gray-500">{cards.length} thiết kế</p>
         </div>
+        <ShareButton path={`/share/freelancer/${id}`} />
         {currentUser && currentUser.id !== id && (
           <form action={startConversation}>
             <input type="hidden" name="userId" value={id} />

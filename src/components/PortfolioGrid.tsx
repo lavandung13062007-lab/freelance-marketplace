@@ -11,9 +11,11 @@ function formatVND(n: number): string {
 export default function PortfolioGrid({
   cards,
   currentUserId,
+  basePath = "/design",
 }: {
   cards: PortfolioCard[];
   currentUserId?: string | null;
+  basePath?: string;
 }) {
   const router = useRouter();
 
@@ -25,7 +27,7 @@ export default function PortfolioGrid({
         return (
           <div
             key={card.id}
-            onClick={() => router.push(`/design/${card.id}`)}
+            onClick={() => router.push(`${basePath}/${card.id}`)}
             className="group cursor-pointer break-inside-avoid"
           >
             <div className="relative overflow-hidden rounded-2xl bg-gray-50">

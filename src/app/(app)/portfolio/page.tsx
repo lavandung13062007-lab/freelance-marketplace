@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/session";
+import ShareButton from "@/components/ShareButton";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Đang chờ duyệt",
@@ -23,12 +24,15 @@ export default async function PortfolioPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-lg font-bold text-gray-900">Portfolio của bạn</h1>
-        <Link
-          href="/portfolio/new"
-          className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white"
-        >
-          + Thêm thiết kế
-        </Link>
+        <div className="flex items-center gap-2">
+          <ShareButton path={`/share/freelancer/${user!.id}`} label="Chia sẻ portfolio" />
+          <Link
+            href="/portfolio/new"
+            className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white"
+          >
+            + Thêm thiết kế
+          </Link>
+        </div>
       </div>
 
       {!posts || posts.length === 0 ? (
