@@ -1,20 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { setFreelancerMode, updateBankInfo } from "@/lib/actions/account";
+import BankSelect from "@/components/BankSelect";
 
 export default function FreelancerSettings({
   initialEnabled,
-  bankName,
+  bankCode,
   bankAccountNumber,
   bankAccountHolder,
 }: {
   initialEnabled: boolean;
-  bankName: string | null;
+  bankCode: string | null;
   bankAccountNumber: string | null;
   bankAccountHolder: string | null;
 }) {
   const [enabled, setEnabled] = useState(initialEnabled);
+  const [saveState, setSaveState] = useState<"idle" | "saved">("idle");
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   function handleToggle(e: React.ChangeEvent<HTMLInputElement>) {
     const next = e.target.checked;
@@ -24,8 +28,13 @@ export default function FreelancerSettings({
     void setFreelancerMode(formData);
   }
 
-  function handleSaveBank(formData: FormData) {
-    void updateBankInfo(formData);
+  function handleSaveBank(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (!formRef.current) return;
+    void updateBankInfo(new FormData(formRef.current));
+    setSaveState("saved");
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => setSaveState("idle"), 3000);
   }
 
   return (
@@ -39,14 +48,11 @@ export default function FreelancerSettings({
       </label>
 
       {enabled && (
-        <form action={handleSaveBank} className="mt-4 space-y-2 rounded-2xl border border-gray-100 p-4">
+        <form ref={formRef} className="mt-4 space-y-2 rounded-2xl border border-gray-100 p-4">
           <p className="text-sm font-semibold text-gray-900">Thông tin nhận thanh toán</p>
-          <input
-            name="bank_name"
-            defaultValue={bankName ?? ""}
-            placeholder="Tên ngân hàng (VD: Vietcombank)"
-            className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-          />
+
+          <BankSelect defaultCode={bankCode} />
+
           <input
             name="bank_account_number"
             inputMode="numeric"
@@ -63,8 +69,14 @@ export default function FreelancerSettings({
           <p className="text-[11px] text-gray-400">
             Dùng để tạo mã QR nhận thanh toán ngay trong đoạn chat với khách (sắp có).
           </p>
-          <button type="submit" className="rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white">
-            Lưu
+          <button
+            type="button"
+            onClick={handleSaveBank}
+            className={`rounded-full px-4 py-2 text-xs font-semibold text-white transition-colors ${
+              saveState === "saved" ? "bg-green-600" : "bg-brand"
+            }`}
+          >
+            {saveState === "saved" ? "Đã lưu ✓" : "Lưu"}
           </button>
         </form>
       )}

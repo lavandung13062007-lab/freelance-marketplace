@@ -47,7 +47,7 @@ export default async function ProfilePage() {
 
       <FreelancerSettings
         initialEnabled={extras?.role === "freelancer"}
-        bankName={bank?.bank_name ?? null}
+        bankCode={bank?.bank_name ?? null}
         bankAccountNumber={bank?.bank_account_number ?? null}
         bankAccountHolder={bank?.bank_account_holder ?? null}
       />

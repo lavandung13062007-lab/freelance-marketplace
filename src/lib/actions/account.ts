@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/session";
+import { VIETNAM_BANKS } from "@/lib/vietnamBanks";
 
 export async function updatePhone(formData: FormData) {
   const user = await getCurrentUser();
@@ -69,7 +70,8 @@ export async function updateBankInfo(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const bank_name = ((formData.get("bank_name") as string) ?? "").trim() || null;
+  const rawCode = ((formData.get("bank_code") as string) ?? "").trim();
+  const bank_name = VIETNAM_BANKS.some((b) => b.code === rawCode) ? rawCode : null;
   const bank_account_number = ((formData.get("bank_account_number") as string) ?? "").trim() || null;
   const bank_account_holder = ((formData.get("bank_account_holder") as string) ?? "").trim() || null;
 
