@@ -1,25 +1,28 @@
-import { getCurrentUser, getCurrentProfile } from "@/lib/supabase/session";
+import { getCurrentUser, getCurrentProfile, getProfileExtras } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
 import { updatePhone } from "@/lib/actions/account";
 import SubmitButton from "@/components/SubmitButton";
+import AvatarUploader from "@/components/AvatarUploader";
+import FreelancerSettings from "@/components/FreelancerSettings";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
-  const profile = await getCurrentProfile();
+  const [profile, extras] = await Promise.all([getCurrentProfile(), getProfileExtras()]);
 
   const supabase = await createClient();
-  const { data: contact } = await supabase
-    .from("account_contacts")
-    .select("phone")
-    .eq("id", user!.id)
-    .maybeSingle();
+  const [{ data: contact }, { data: bank }] = await Promise.all([
+    supabase.from("account_contacts").select("phone").eq("id", user!.id).maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("bank_name, bank_account_number, bank_account_holder")
+      .eq("id", user!.id)
+      .maybeSingle(),
+  ]);
 
   return (
     <div className="max-w-sm">
       <div className="flex items-center gap-3">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-yellow text-xl font-bold text-gray-900">
-          {(profile?.full_name ?? "?").charAt(0).toUpperCase()}
-        </span>
+        <AvatarUploader name={profile?.full_name ?? "?"} avatarUrl={extras?.avatar_url ?? null} />
         <div>
           <p className="font-bold text-gray-900">{profile?.full_name}</p>
           <p className="text-sm text-gray-500">{user?.email}</p>
@@ -41,6 +44,13 @@ export default async function ProfilePage() {
         </p>
         <SubmitButton>Lưu</SubmitButton>
       </form>
+
+      <FreelancerSettings
+        initialEnabled={extras?.role === "freelancer"}
+        bankName={bank?.bank_name ?? null}
+        bankAccountNumber={bank?.bank_account_number ?? null}
+        bankAccountHolder={bank?.bank_account_holder ?? null}
+      />
     </div>
   );
 }

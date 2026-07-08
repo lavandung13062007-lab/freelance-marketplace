@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/lib/actions/auth";
 import NotificationBell from "@/components/NotificationBell";
+import Avatar from "@/components/Avatar";
 
 function HomeIcon() {
   return (
@@ -47,7 +48,7 @@ const NAV_ITEMS = [
   { href: "/messages", label: "Tin nhắn", Icon: MessageIcon },
 ];
 
-export default function Sidebar({ name }: { name: string }) {
+export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
   const pathname = usePathname();
 
   return (
@@ -92,9 +93,7 @@ export default function Sidebar({ name }: { name: string }) {
 
       <div className="mt-auto flex flex-col items-center gap-1">
         <Link href="/profile" title="Hồ sơ">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-yellow text-sm font-bold text-gray-900">
-            {name.charAt(0).toUpperCase() || "?"}
-          </span>
+          <Avatar name={name} avatarUrl={avatarUrl} size="h-9 w-9 text-sm" />
         </Link>
         <form action={logout}>
           <button

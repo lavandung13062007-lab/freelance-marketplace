@@ -30,7 +30,7 @@ export default async function ConversationPage({
   // 4 truy vấn độc lập, chạy song song thay vì nối tiếp để mở hội thoại nhanh hơn.
   // extras tách riêng: nếu status/agreed_price chưa tồn tại (chưa chạy migration mới)
   // thì trang vẫn mở được, chỉ bảng bên phải dùng giá trị mặc định.
-  const [{ data: extras }, { data: otherProfile }, { data: read }, { data: messages }, { data: ownPortfolio }] =
+  const [{ data: extras }, { data: otherProfile }, { data: read }, { data: messages }, { data: ownProfile }] =
     await Promise.all([
       supabase.from("conversations").select("status, agreed_price").eq("id", id).maybeSingle(),
       supabase.from("profiles").select("full_name").eq("id", otherId).maybeSingle(),
@@ -45,13 +45,11 @@ export default async function ConversationPage({
         .select("id, sender_id, content, created_at")
         .eq("conversation_id", id)
         .order("created_at", { ascending: true }),
-      // Không có vai trò thật trong hệ thống — suy đoán "freelancer" bằng việc
-      // người dùng đã có ít nhất 1 ảnh portfolio được duyệt hay chưa.
-      supabase.from("portfolio_posts").select("id").eq("freelancer_id", user.id).eq("status", "approved").limit(1),
+      supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
     ]);
 
   const realName = otherProfile?.full_name ?? "Người dùng";
-  const viewerIsFreelancer = (ownPortfolio ?? []).length > 0;
+  const viewerIsFreelancer = ownProfile?.role === "freelancer";
 
   return (
     <div className="flex h-full gap-4">

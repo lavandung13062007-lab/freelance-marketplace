@@ -21,3 +21,18 @@ export const getCurrentProfile = cache(async () => {
     .single();
   return data;
 });
+
+// Tách riêng khỏi getCurrentProfile: nếu avatar_url/role chưa tồn tại (chưa chạy
+// migration mới) thì chỉ ảnh đại diện/chế độ freelancer bị ảnh hưởng, không kéo
+// theo việc hiển thị tên ở khắp nơi.
+export const getProfileExtras = cache(async () => {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("avatar_url, role")
+    .eq("id", user.id)
+    .maybeSingle();
+  return data;
+});
