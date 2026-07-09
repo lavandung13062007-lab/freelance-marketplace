@@ -388,11 +388,95 @@ export default async function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-100">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-gray-500 sm:flex-row">
-          <Logo />
-          <p>Sàn thuê thiết kế &amp; đồ hoạ cho người Việt.</p>
-          <p>© {new Date().getFullYear()} Sala</p>
+      <footer className="bg-gray-900 text-gray-400">
+        <div className="mx-auto max-w-6xl px-5 py-16">
+          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12">
+            {/* Thương hiệu + liên hệ */}
+            <div className="lg:col-span-4">
+              <Logo light />
+              <p className="mt-4 max-w-xs text-sm leading-relaxed">
+                Sala là nền tảng kết nối khách hàng với freelancer thiết kế &amp; đồ hoạ Việt Nam —
+                minh bạch, an toàn và tiện lợi.
+              </p>
+              <div className="mt-6 flex gap-3">
+                {[
+                  { label: "Facebook", d: "M13 22v-8h2.5l.5-3H13V9.2c0-.9.3-1.5 1.6-1.5H16V5.1C15.7 5 14.8 5 13.8 5 11.6 5 10 6.3 10 8.9V11H7.5v3H10v8h3Z" },
+                  { label: "Messenger", d: "M12 3C7 3 3.2 6.6 3.2 11.3c0 2.5 1.1 4.7 2.9 6.2V21l2.7-1.5c.7.2 1.5.3 2.2.3 5 0 8.8-3.6 8.8-8.3S17 3 12 3Zm.9 11.2-2.3-2.4-4.3 2.4 4.7-5 2.4 2.4 4.2-2.4-4.4 5Z" },
+                  { label: "YouTube", d: "M21.6 8.2c-.2-.9-.9-1.5-1.7-1.7C18.3 6 12 6 12 6s-6.3 0-7.9.5c-.8.2-1.5.8-1.7 1.7C2 9.8 2 12 2 12s0 2.2.4 3.8c.2.9.9 1.5 1.7 1.7C5.7 18 12 18 12 18s6.3 0 7.9-.5c.8-.2 1.5-.8 1.7-1.7.4-1.6.4-3.8.4-3.8s0-2.2-.4-3.8ZM10 15V9l5 3-5 3Z" },
+                  { label: "TikTok", d: "M16 3c.3 2 1.6 3.5 3.5 3.8V9c-1.3 0-2.5-.4-3.5-1v6.5A5.5 5.5 0 1 1 10.5 9v2.6a2.9 2.9 0 1 0 2.9 2.9V3H16Z" },
+                ].map((s) => (
+                  <a
+                    key={s.label}
+                    href="#"
+                    aria-label={s.label}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-brand"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                      <path d={s.d} />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Cột liên kết */}
+            <div className="lg:col-span-2">
+              <h4 className="text-sm font-bold text-white">Khám phá</h4>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li><Link href="/" className="hover:text-white">Trang chủ</Link></li>
+                <li><a href="#danh-muc" className="hover:text-white">Danh mục</a></li>
+                <li><a href="#cach-hoat-dong" className="hover:text-white">Cách hoạt động</a></li>
+                <li><Link href="/signup" className="hover:text-white">Tạo tài khoản</Link></li>
+              </ul>
+            </div>
+
+            <div className="lg:col-span-2">
+              <h4 className="text-sm font-bold text-white">Hỗ trợ</h4>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li><a href="#" className="hover:text-white">Trung tâm trợ giúp</a></li>
+                <li><a href="#" className="hover:text-white">Câu hỏi thường gặp</a></li>
+                <li><a href="#" className="hover:text-white">Hướng dẫn thuê thiết kế</a></li>
+                <li><a href="#" className="hover:text-white">Báo cáo vi phạm</a></li>
+              </ul>
+            </div>
+
+            <div className="lg:col-span-4">
+              <h4 className="text-sm font-bold text-white">Liên hệ</h4>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li className="flex gap-2.5">
+                  <span aria-hidden className="mt-0.5 text-brand-yellow">📍</span>
+                  <span>Tầng 8, Toà nhà Sài Gòn Center, 65 Lê Lợi, P. Bến Nghé, Quận 1, TP. Hồ Chí Minh</span>
+                </li>
+                <li className="flex gap-2.5">
+                  <span aria-hidden className="text-brand-yellow">📞</span>
+                  <a href="tel:19006868" className="hover:text-white">Hotline: 1900 6868</a>
+                </li>
+                <li className="flex gap-2.5">
+                  <span aria-hidden className="text-brand-yellow">✉️</span>
+                  <a href="mailto:hotro@sala.vn" className="hover:text-white">hotro@sala.vn</a>
+                </li>
+                <li className="flex gap-2.5">
+                  <span aria-hidden className="text-brand-yellow">🕐</span>
+                  <span>Thứ 2 – Thứ 7, 8:00 – 18:00</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Thanh pháp lý */}
+        <div className="border-t border-white/10">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs sm:flex-row">
+            <p>
+              © {new Date().getFullYear()} Công ty TNHH Sala Việt Nam · MST: 0312 345 678 · GPĐKKD do Sở
+              KH&amp;ĐT TP.HCM cấp
+            </p>
+            <div className="flex gap-5">
+              <a href="#" className="hover:text-white">Điều khoản</a>
+              <a href="#" className="hover:text-white">Bảo mật</a>
+              <a href="#" className="hover:text-white">Cookie</a>
+            </div>
+          </div>
         </div>
       </footer>
     </main>
