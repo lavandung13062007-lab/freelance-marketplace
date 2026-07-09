@@ -32,7 +32,7 @@ export default async function PublicPortfolioPage({
           <span className="h-6 w-6 rounded-full bg-brand" />
           <span className="-ml-2 h-6 w-2 rounded-full bg-brand-yellow" />
         </span>
-        <span className="text-sm font-bold text-gray-900">Sàn Freelance Thiết kế</span>
+        <span className="text-sm font-bold text-gray-900">Sala</span>
         <Link
           href="/login"
           className="ml-auto rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white hover:opacity-90"

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sàn Freelance Thiết kế",
+  title: "Sala — Thuê thiết kế",
   description: "Kết nối khách hàng và freelancer thiết kế/đồ hoạ",
 };
 

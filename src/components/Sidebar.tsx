@@ -6,7 +6,14 @@ import { logout } from "@/lib/actions/auth";
 import NotificationBell from "@/components/NotificationBell";
 import Avatar from "@/components/Avatar";
 
-function HomeIcon() {
+function HomeIcon({ filled }: { filled?: boolean }) {
+  if (filled) {
+    return (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 shrink-0">
+        <path d="M12 3 2.5 11.3A1 1 0 0 0 3.16 13H5v7a1 1 0 0 0 1 1h3.5v-6h5v6H18a1 1 0 0 0 1-1v-7h1.84a1 1 0 0 0 .66-1.75L12 3Z" />
+      </svg>
+    );
+  }
   return (
     <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-5 w-5 shrink-0">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 11.5 12 4l9 7.5" />
@@ -15,9 +22,15 @@ function HomeIcon() {
   );
 }
 
-function MessageIcon() {
+function MessageIcon({ filled }: { filled?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-5 w-5 shrink-0">
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      strokeWidth={2}
+      stroke="currentColor"
+      className="h-5 w-5 shrink-0"
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16v11H8l-4 4V5Z" />
     </svg>
   );
@@ -58,12 +71,12 @@ export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?:
 
   return (
     <aside className="group flex h-screen w-16 shrink-0 flex-col border-r border-gray-100 px-3 py-5 transition-[width] duration-200 ease-out hover:w-56">
-      <Link href="/dashboard" title="Sàn Freelance" className="mb-4 flex h-9 items-center rounded-xl">
+      <Link href="/dashboard" title="Sala" className="mb-4 flex h-9 items-center rounded-xl">
         <span className="flex w-10 shrink-0 items-center">
           <span className="h-6 w-6 rounded-full bg-brand" />
           <span className="-ml-2 h-6 w-2 rounded-full bg-brand-yellow" />
         </span>
-        <span className={`${LABEL} text-sm font-bold text-gray-900`}>Sàn Freelance</span>
+        <span className={`${LABEL} text-sm font-bold text-gray-900`}>Sala</span>
       </Link>
 
       <Link
@@ -88,11 +101,11 @@ export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?:
               href={href}
               title={label}
               className={`flex h-10 items-center rounded-xl ${
-                active ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-gray-50"
+                active ? "bg-brand/10 text-brand" : "text-gray-500 hover:bg-gray-50"
               }`}
             >
               <span className="flex w-10 shrink-0 items-center justify-center">
-                <Icon />
+                <Icon filled={active} />
               </span>
               <span className={`${LABEL} text-sm font-medium`}>{label}</span>
             </Link>

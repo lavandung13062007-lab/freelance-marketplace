@@ -10,9 +10,9 @@ export default function ShareWelcomeBanner() {
   return (
     <div className="flex items-center justify-between gap-3 bg-brand px-4 py-2.5 text-sm text-white">
       <p className="min-w-0 truncate">
-        Chào mừng bạn đến với <strong>Sàn Freelance Thiết kế</strong> —{" "}
+        Chào mừng bạn đã đến với sàn <strong>Sala</strong> —{" "}
         <Link href="/login" className="underline underline-offset-2 hover:no-underline">
-          khám phá thêm dịch vụ thiết kế tại đây
+          Thuê thiết kế tại đây
         </Link>
       </p>
       <button
