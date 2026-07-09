@@ -21,3 +21,82 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* ---- Hiệu ứng cho trang cổng chào (landing) ---- */
+@keyframes sala-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes sala-marquee-reverse {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes sala-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes sala-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sala-blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -20px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+.animate-marquee {
+  animation: sala-marquee 45s linear infinite;
+}
+.animate-marquee-reverse {
+  animation: sala-marquee-reverse 45s linear infinite;
+}
+.marquee-row:hover .animate-marquee,
+.marquee-row:hover .animate-marquee-reverse {
+  animation-play-state: paused;
+}
+.animate-float {
+  animation: sala-float 6s ease-in-out infinite;
+}
+.animate-blob {
+  animation: sala-blob 18s ease-in-out infinite;
+}
+.animate-fade-up {
+  animation: sala-fade-up 0.8s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .animate-float,
+  .animate-blob,
+  .animate-fade-up {
+    animation: none;
+  }
+}
