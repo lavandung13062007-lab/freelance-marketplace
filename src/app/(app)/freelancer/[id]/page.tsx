@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/supabase/session";
 import { getApprovedPortfolioCards } from "@/lib/portfolio";
 import PortfolioGrid from "@/components/PortfolioGrid";
 import ShareButton from "@/components/ShareButton";
+import FollowButton from "@/components/FollowButton";
 import { startConversation } from "@/lib/actions/messages";
 
 export default async function FreelancerProfilePage({
@@ -25,6 +26,31 @@ export default async function FreelancerProfilePage({
 
   const cards = await getApprovedPortfolioCards(id);
 
+  // Lượt theo dõi + trạng thái "mình có đang theo dõi không".
+  // Bảng follows có thể chưa tạo (chưa chạy migration) — coi như 0/false.
+  let followerCount = 0;
+  let isFollowing = false;
+  try {
+    const [{ count }, mine] = await Promise.all([
+      supabase
+        .from("follows")
+        .select("follower_id", { count: "exact", head: true })
+        .eq("freelancer_id", id),
+      currentUser
+        ? supabase
+            .from("follows")
+            .select("follower_id")
+            .eq("follower_id", currentUser.id)
+            .eq("freelancer_id", id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+    followerCount = count ?? 0;
+    isFollowing = Boolean(mine.data);
+  } catch {
+    // giữ mặc định
+  }
+
   return (
     <div>
       <div className="mb-8 flex items-center gap-3">
@@ -36,6 +62,13 @@ export default async function FreelancerProfilePage({
           <p className="text-sm text-gray-500">{cards.length} thiết kế</p>
         </div>
         <ShareButton path={`/share/freelancer/${id}`} />
+        {currentUser && currentUser.id !== id && (
+          <FollowButton
+            freelancerId={id}
+            initialFollowing={isFollowing}
+            initialCount={followerCount}
+          />
+        )}
         {currentUser && currentUser.id !== id && (
           <form action={startConversation}>
             <input type="hidden" name="userId" value={id} />

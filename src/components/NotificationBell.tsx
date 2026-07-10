@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 function BellIcon({ filled }: { filled?: boolean }) {
   if (filled) {
@@ -19,37 +22,48 @@ function BellIcon({ filled }: { filled?: boolean }) {
   );
 }
 
+// Thông báo giờ là tính năng chính: chuông dẫn tới trang /notifications
+// (2 màn hình: Thông báo + Tin tức). Badge đỏ = số chưa đọc, tự cập nhật.
 export default function NotificationBell() {
-  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const active = pathname === "/notifications";
+  const [unread, setUnread] = useState(0);
+
+  const load = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("is_read", false);
+      if (!error) setUnread(count ?? 0);
+    } catch {
+      // bảng notifications chưa tạo — coi như 0
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+    const timer = setInterval(load, 25000);
+    return () => clearInterval(timer);
+  }, [load, pathname]); // đổi trang thì load lại (vd sau khi đọc hết ở /notifications)
 
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Thông báo"
-        title="Thông báo"
-        className={`flex h-10 w-full items-center rounded-xl ${
-          open ? "bg-brand/10 text-brand" : "text-gray-500 hover:bg-gray-50"
-        }`}
-      >
-        <span className="flex w-10 shrink-0 items-center justify-center">
-          <BellIcon filled={open} />
-        </span>
-        <span className="pointer-events-none ml-1 whitespace-nowrap text-sm font-medium opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-          Thông báo
-        </span>
-      </button>
-
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute bottom-0 left-full z-20 ml-2 w-64 rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-lg">
-            <p className="text-sm font-semibold text-gray-900">Chưa có thông báo</p>
-            <p className="mt-1 text-xs text-gray-500">Thông báo mới sẽ xuất hiện ở đây</p>
-          </div>
-        </>
-      )}
-    </div>
+    <Link
+      href="/notifications"
+      title="Thông báo"
+      className={`flex h-10 items-center rounded-xl ${
+        active ? "bg-brand/10 text-brand" : "text-gray-500 hover:bg-gray-50"
+      }`}
+    >
+      <span className="relative flex w-10 shrink-0 items-center justify-center">
+        <BellIcon filled={active} />
+        {unread > 0 && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
+      </span>
+    </Link>
   );
 }

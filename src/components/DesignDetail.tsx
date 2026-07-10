@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { CardDetail, PortfolioCard } from "@/lib/portfolio";
 import { startConversation } from "@/lib/actions/messages";
 import RecommendedFeed from "@/components/RecommendedFeed";
+import LikeButton from "@/components/LikeButton";
 import { recordInterest, recordFreelancerVisit } from "@/lib/clientHistory";
 
 function formatVND(n: number): string {
@@ -192,6 +193,7 @@ export default function DesignDetail({
           )}
 
           <div className="mt-5 flex flex-wrap gap-3">
+            <LikeButton imageId={detail.id} currentUserId={currentUserId} />
             {detail.link && (
               <a
                 href={detail.link}

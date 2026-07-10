@@ -61,22 +61,17 @@ const NAV_ITEMS = [
   { href: "/messages", label: "Tin nhắn", Icon: MessageIcon },
 ];
 
-// Nhãn chỉ hiện khi di chuột vào sidebar (group-hover). pointer-events-none để
-// phần chữ tràn ra ngoài lúc thu gọn không che mất nội dung bên cạnh.
-const LABEL =
-  "pointer-events-none ml-1 whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100";
-
+// Sidebar chỉ hiện icon, tên đầy đủ nằm ở tooltip (title) khi di chuột.
 export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
   const pathname = usePathname();
 
   return (
-    <aside className="group flex h-screen w-16 shrink-0 flex-col border-r border-gray-100 px-3 py-5 transition-[width] duration-200 ease-out hover:w-56">
+    <aside className="flex h-screen w-16 shrink-0 flex-col border-r border-gray-100 px-3 py-5">
       <Link href="/dashboard" title="Sala" className="mb-4 flex h-9 items-center rounded-xl">
         <span className="flex w-10 shrink-0 items-center">
           <span className="h-6 w-6 rounded-full bg-brand" />
           <span className="-ml-2 h-6 w-2 rounded-full bg-brand-yellow" />
         </span>
-        <span className={`${LABEL} text-sm font-bold text-gray-900`}>Sala</span>
       </Link>
 
       <Link
@@ -89,7 +84,6 @@ export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?:
         <span className="flex w-10 shrink-0 items-center justify-center">
           <PortfolioIcon />
         </span>
-        <span className={`${LABEL} text-sm font-semibold`}>Portfolio</span>
       </Link>
 
       <nav className="flex flex-col gap-1">
@@ -107,7 +101,6 @@ export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?:
               <span className="flex w-10 shrink-0 items-center justify-center">
                 <Icon filled={active} />
               </span>
-              <span className={`${LABEL} text-sm font-medium`}>{label}</span>
             </Link>
           );
         })}
@@ -115,11 +108,10 @@ export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?:
       </nav>
 
       <div className="mt-auto flex flex-col gap-1">
-        <Link href="/profile" title="Hồ sơ" className="flex h-11 items-center rounded-xl hover:bg-gray-50">
+        <Link href="/profile" title={name} className="flex h-11 items-center rounded-xl hover:bg-gray-50">
           <span className="flex w-10 shrink-0 items-center justify-center">
             <Avatar name={name} avatarUrl={avatarUrl} size="h-9 w-9 text-sm" />
           </span>
-          <span className={`${LABEL} truncate text-sm font-semibold text-gray-900`}>{name}</span>
         </Link>
         <form action={logout}>
           <button
@@ -129,7 +121,6 @@ export default function Sidebar({ name, avatarUrl }: { name: string; avatarUrl?:
             <span className="flex w-10 shrink-0 items-center justify-center">
               <LogoutIcon />
             </span>
-            <span className={`${LABEL} text-sm font-medium`}>Thoát</span>
           </button>
         </form>
       </div>
