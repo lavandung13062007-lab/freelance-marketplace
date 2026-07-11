@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { searchApproved } from "@/lib/portfolio";
+import { getCurrentUser } from "@/lib/supabase/session";
 import TopSearchBar from "@/components/TopSearchBar";
+import PortfolioGrid from "@/components/PortfolioGrid";
 
 export default async function SearchPage({
   searchParams,
@@ -9,9 +11,10 @@ export default async function SearchPage({
 }) {
   const { q = "" } = await searchParams;
   const query = q.trim();
-  const results = query
-    ? await searchApproved(query)
-    : { freelancers: [], designs: [] };
+  const [results, currentUser] = await Promise.all([
+    query ? searchApproved(query) : Promise.resolve({ freelancers: [], designs: [] }),
+    getCurrentUser(),
+  ]);
 
   const empty = results.freelancers.length === 0 && results.designs.length === 0;
 
@@ -57,17 +60,7 @@ export default async function SearchPage({
           {results.designs.length > 0 && (
             <section>
               <h2 className="mb-3 text-sm font-bold text-gray-900">Thiết kế</h2>
-              <div className="columns-2 gap-4 sm:columns-3 lg:columns-4 [&>*]:mb-4">
-                {results.designs.map((d) => (
-                  <Link key={d.id} href={`/design/${d.id}`} className="block break-inside-avoid">
-                    <div className="overflow-hidden rounded-2xl bg-gray-50">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={d.cover} alt={d.title} loading="lazy" className="w-full rounded-2xl" />
-                    </div>
-                    <p className="truncate px-1 py-2 text-xs font-medium text-gray-600">{d.title}</p>
-                  </Link>
-                ))}
-              </div>
+              <PortfolioGrid cards={results.designs} currentUserId={currentUser?.id} />
             </section>
           )}
         </div>

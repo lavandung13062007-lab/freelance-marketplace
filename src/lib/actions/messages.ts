@@ -9,24 +9,52 @@ function orderPair(a: string, b: string): [string, string] {
   return a < b ? [a, b] : [b, a];
 }
 
+type DesignJoin = { freelancer_id: string } | { freelancer_id: string }[] | null;
+
+function extractFreelancerId(join: DesignJoin): string | null {
+  return (Array.isArray(join) ? join[0]?.freelancer_id : join?.freelancer_id) ?? null;
+}
+
 export async function startConversation(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const otherId = formData.get("userId") as string;
+  const supabase = await createClient();
+
+  // Nếu bấm "Nhắn tin" từ 1 thiết kế cụ thể: xác định freelancer qua chính
+  // thiết kế đó (đáng tin hơn userId gửi kèm) để chốt luôn deal ban đầu.
+  const designId = (formData.get("designId") as string) || null;
+  let otherId = formData.get("userId") as string;
+  let design: { title: string; image_url: string; price: number | null } | null = null;
+
+  if (designId) {
+    const { data: img } = await supabase
+      .from("portfolio_post_images")
+      .select("title, image_url, price, portfolio_posts!inner(freelancer_id)")
+      .eq("id", designId)
+      .maybeSingle();
+    if (img) {
+      const freelancerId = extractFreelancerId(img.portfolio_posts as DesignJoin);
+      if (freelancerId) {
+        otherId = freelancerId;
+        design = { title: img.title, image_url: img.image_url, price: img.price };
+      }
+    }
+  }
+
   if (!otherId || otherId === user.id) return;
 
   const [userA, userB] = orderPair(user.id, otherId);
-  const supabase = await createClient();
 
   const { data: existing } = await supabase
     .from("conversations")
-    .select("id")
+    .select("id, deal_image_id")
     .eq("user_a", userA)
     .eq("user_b", userB)
     .maybeSingle();
 
   let conversationId = existing?.id as string | undefined;
+  let hasDeal = Boolean(existing?.deal_image_id);
 
   if (!conversationId) {
     const { data: created, error } = await supabase
@@ -38,6 +66,34 @@ export async function startConversation(formData: FormData) {
       redirect(`/freelancer/${otherId}?error=${encodeURIComponent(error.message)}`);
     }
     conversationId = created!.id;
+    hasDeal = false;
+  }
+
+  // Chỉ chốt deal + tự gửi ảnh cho LẦN ĐẦU thiết kế được chia sẻ trong hội thoại
+  // này — tránh spam nếu khách bấm "Nhắn tin" nhiều lần hoặc từ thiết kế khác.
+  if (design && designId && !hasDeal) {
+    await supabase
+      .from("conversations")
+      .update({ deal_image_id: designId, proposed_price: design.price })
+      .eq("id", conversationId);
+
+    await supabase.from("messages").insert({
+      conversation_id: conversationId,
+      sender_id: user.id,
+      message_type: "design_share",
+      content: `Mình quan tâm thiết kế "${design.title}"`,
+      metadata: {
+        post_image_id: designId,
+        title: design.title,
+        cover: design.image_url,
+        price: design.price,
+      },
+    });
+
+    await supabase
+      .from("conversations")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", conversationId);
   }
 
   redirect(`/messages/${conversationId}`);
@@ -54,7 +110,7 @@ export async function sendMessage(conversationId: string, content: string) {
   const { data, error } = await supabase
     .from("messages")
     .insert({ conversation_id: conversationId, sender_id: user.id, content: trimmed })
-    .select("id, sender_id, content, created_at")
+    .select("id, sender_id, content, created_at, message_type, metadata")
     .single();
 
   if (error) return null;

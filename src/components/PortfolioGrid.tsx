@@ -20,7 +20,7 @@ export default function PortfolioGrid({
   const router = useRouter();
 
   return (
-    <div className="columns-2 gap-4 sm:columns-3 lg:columns-4 [&>*]:mb-4">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       {cards.map((card) => {
         const canMessage = Boolean(currentUserId) && currentUserId !== card.freelancerId;
 
@@ -28,15 +28,16 @@ export default function PortfolioGrid({
           <div
             key={card.id}
             onClick={() => router.push(`${basePath}/${card.id}`)}
-            className="group cursor-pointer break-inside-avoid"
+            className="group cursor-pointer"
           >
-            <div className="relative overflow-hidden rounded-2xl bg-gray-50">
+            {/* aspect-ratio cố định để giữ chỗ trước khi ảnh tải xong — tránh bố cục nhảy giật */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gray-50">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={card.cover}
                 alt={card.title}
                 loading="lazy"
-                className="w-full rounded-2xl"
+                className="absolute inset-0 h-full w-full object-cover"
               />
 
               <div className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-black/0 p-3 opacity-0 transition group-hover:bg-black/60 group-hover:opacity-100">
@@ -49,6 +50,12 @@ export default function PortfolioGrid({
                 <div className="pointer-events-auto space-y-1.5">
                   {card.price != null && (
                     <p className="text-base font-bold text-white">{formatVND(card.price)}</p>
+                  )}
+                  {card.price != null && card.depositPercent != null && (
+                    <p className="text-[11px] text-white/80">
+                      Cọc trước {card.depositPercent}% — ~
+                      {formatVND(Math.round((card.price * card.depositPercent) / 100))}
+                    </p>
                   )}
                   {card.description && (
                     <p className="line-clamp-2 text-xs text-white/90">{card.description}</p>
@@ -68,6 +75,7 @@ export default function PortfolioGrid({
                     {canMessage && (
                       <form action={startConversation} onClick={(e) => e.stopPropagation()}>
                         <input type="hidden" name="userId" value={card.freelancerId} />
+                        <input type="hidden" name="designId" value={card.id} />
                         <button className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white">
                           Nhắn tin
                         </button>

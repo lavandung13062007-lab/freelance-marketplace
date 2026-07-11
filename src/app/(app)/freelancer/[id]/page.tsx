@@ -18,7 +18,7 @@ export default async function FreelancerProfilePage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, deposit_percent")
     .eq("id", id)
     .maybeSingle();
 
@@ -59,7 +59,14 @@ export default async function FreelancerProfilePage({
         </span>
         <div className="flex-1">
           <p className="text-lg font-extrabold text-gray-900">{profile.full_name}</p>
-          <p className="text-sm text-gray-500">{cards.length} thiết kế</p>
+          <p className="text-sm text-gray-500">
+            {cards.length} thiết kế
+            {profile.deposit_percent != null && (
+              <span className="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
+                Cọc trước {profile.deposit_percent}%
+              </span>
+            )}
+          </p>
         </div>
         <ShareButton path={`/share/freelancer/${id}`} />
         {currentUser && currentUser.id !== id && (

@@ -27,16 +27,19 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
 
 function MessageButton({
   freelancerId,
+  designId,
   className,
   children,
 }: {
   freelancerId: string;
+  designId?: string;
   className: string;
   children: React.ReactNode;
 }) {
   return (
     <form action={startConversation} onClick={(e) => e.stopPropagation()}>
       <input type="hidden" name="userId" value={freelancerId} />
+      {designId && <input type="hidden" name="designId" value={designId} />}
       <button className={className}>{children}</button>
     </form>
   );
@@ -135,6 +138,7 @@ export default function DesignDetail({
               <div className="absolute right-3 top-3 opacity-0 transition group-hover:opacity-100">
                 <MessageButton
                   freelancerId={detail.freelancer.id}
+                  designId={detail.id}
                   className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow"
                 >
                   Nhắn tin
@@ -172,6 +176,12 @@ export default function DesignDetail({
           <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-gray-900">{detail.title}</h1>
           {detail.price != null && (
             <p className="mt-2 text-xl font-bold text-brand">{formatVND(detail.price)}</p>
+          )}
+          {detail.price != null && detail.depositPercent != null && (
+            <p className="mt-0.5 text-xs text-gray-500">
+              Đặt cọc trước {detail.depositPercent}% — ước tính{" "}
+              {formatVND(Math.round((detail.price * detail.depositPercent) / 100))}
+            </p>
           )}
           {detail.description && (
             <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-gray-600">
@@ -214,6 +224,7 @@ export default function DesignDetail({
             {canMessage && (
               <MessageButton
                 freelancerId={detail.freelancer.id}
+                designId={detail.id}
                 className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white"
               >
                 Nhắn tin cho freelancer
@@ -262,6 +273,7 @@ export default function DesignDetail({
                     <div className="absolute inset-x-0 bottom-0 flex justify-end p-2 opacity-0 transition group-hover:opacity-100">
                       <MessageButton
                         freelancerId={c.freelancerId}
+                        designId={c.id}
                         className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow"
                       >
                         Nhắn tin

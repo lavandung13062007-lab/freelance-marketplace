@@ -14,7 +14,7 @@ export default async function ProfilePage() {
     supabase.from("account_contacts").select("phone").eq("id", user!.id).maybeSingle(),
     supabase
       .from("profiles")
-      .select("bank_name, bank_account_number, bank_account_holder")
+      .select("bank_name, bank_account_number, bank_account_holder, deposit_percent")
       .eq("id", user!.id)
       .maybeSingle(),
   ]);
@@ -50,6 +50,7 @@ export default async function ProfilePage() {
         bankCode={bank?.bank_name ?? null}
         bankAccountNumber={bank?.bank_account_number ?? null}
         bankAccountHolder={bank?.bank_account_holder ?? null}
+        depositPercent={bank?.deposit_percent ?? null}
       />
     </div>
   );

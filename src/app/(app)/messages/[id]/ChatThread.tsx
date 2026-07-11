@@ -1,12 +1,27 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage, markConversationRead } from "@/lib/actions/messages";
+import { agreeToOffer } from "@/lib/actions/deals";
 import { formatDivider } from "@/lib/timeAgo";
 import ConversationMenu from "@/components/ConversationMenu";
 
-type Message = { id: string; sender_id: string; content: string; created_at: string };
+type DesignMetadata = { post_image_id: string; title: string; cover: string; price: number | null };
+
+type Message = {
+  id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  message_type?: "text" | "design_share" | "price_offer";
+  metadata?: DesignMetadata | null;
+};
+
+function formatVND(n: number): string {
+  return `${n.toLocaleString("vi-VN")} ₫`;
+}
 
 const GROUP_GAP_MS = 3 * 60 * 1000;
 const DIVIDER_GAP_MS = 15 * 60 * 1000;
@@ -48,6 +63,60 @@ function SendIcon() {
   );
 }
 
+function DesignMessageCard({
+  mine,
+  meta,
+  isOffer,
+  showAgree,
+  agreed,
+  onAgree,
+  agreeing,
+}: {
+  mine: boolean;
+  meta: DesignMetadata;
+  isOffer: boolean;
+  showAgree: boolean;
+  agreed: boolean;
+  onAgree: () => void;
+  agreeing: boolean;
+}) {
+  return (
+    <div
+      className={`w-64 overflow-hidden rounded-2xl border ${
+        mine ? "border-brand/20 bg-white" : "border-gray-100 bg-white"
+      }`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={meta.cover} alt={meta.title} className="h-40 w-full object-cover" />
+      <div className="p-3">
+        {isOffer && (
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-brand">
+            Đề nghị giá
+          </p>
+        )}
+        <p className="truncate text-sm font-semibold text-gray-900">{meta.title}</p>
+        {meta.price != null && (
+          <p className="mt-0.5 text-base font-bold text-brand">{formatVND(meta.price)}</p>
+        )}
+
+        {isOffer && showAgree && !agreed && (
+          <button
+            type="button"
+            onClick={onAgree}
+            disabled={agreeing}
+            className="mt-2 w-full rounded-full bg-green-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+          >
+            {agreeing ? "Đang xử lý…" : "✓ Đồng ý"}
+          </button>
+        )}
+        {isOffer && agreed && (
+          <p className="mt-2 text-center text-xs font-semibold text-green-600">Đã đồng ý ✓</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ChatThread({
   conversationId,
   currentUserId,
@@ -56,6 +125,8 @@ export default function ChatThread({
   nickname,
   pinned,
   initialMessages,
+  freelancerId,
+  dealStatus,
 }: {
   conversationId: string;
   currentUserId: string;
@@ -64,13 +135,26 @@ export default function ChatThread({
   nickname: string | null;
   pinned: boolean;
   initialMessages: Message[];
+  freelancerId: string;
+  dealStatus: string;
 }) {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [agreeing, setAgreeing] = useState(false);
+  const isFreelancerViewer = currentUserId === freelancerId;
+  const dealAgreed = dealStatus !== "discussing";
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  async function handleAgree() {
+    if (agreeing) return;
+    setAgreeing(true);
+    await agreeToOffer(conversationId, freelancerId);
+    router.refresh();
+  }
 
   useEffect(() => {
     markConversationRead(conversationId);
@@ -144,6 +228,10 @@ export default function ChatThread({
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   }
 
+  // Chỉ đề nghị giá MỚI NHẤT mới còn actionable — các đề nghị cũ hơn (nếu freelancer
+  // đổi ý gửi lại) hiển thị mờ đi, không cho bấm Đồng ý nữa.
+  const lastOfferId = [...messages].reverse().find((m) => m.message_type === "price_offer")?.id;
+
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col rounded-3xl bg-gray-50">
       <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-3">
@@ -186,13 +274,25 @@ export default function ChatThread({
                   </p>
                 )}
                 <div className={`flex ${mine ? "justify-end" : "justify-start"} ${gapClass}`}>
-                  <div
-                    className={`max-w-md px-4 py-2 text-sm ${
-                      mine ? "bg-brand text-white" : "border border-gray-100 bg-white text-gray-900"
-                    } ${cornerClass(mine, groupedWithPrev, groupedWithNext)}`}
-                  >
-                    {m.content}
-                  </div>
+                  {m.metadata && (m.message_type === "design_share" || m.message_type === "price_offer") ? (
+                    <DesignMessageCard
+                      mine={mine}
+                      meta={m.metadata}
+                      isOffer={m.message_type === "price_offer"}
+                      showAgree={!isFreelancerViewer && m.id === lastOfferId}
+                      agreed={dealAgreed && m.id === lastOfferId}
+                      onAgree={handleAgree}
+                      agreeing={agreeing}
+                    />
+                  ) : (
+                    <div
+                      className={`max-w-md px-4 py-2 text-sm ${
+                        mine ? "bg-brand text-white" : "border border-gray-100 bg-white text-gray-900"
+                      } ${cornerClass(mine, groupedWithPrev, groupedWithNext)}`}
+                    >
+                      {m.content}
+                    </div>
+                  )}
                 </div>
               </div>
             );
